@@ -1,6 +1,7 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
@@ -45,5 +46,10 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     @Override
     public void clear() {
         this.reactions.clear();
+    }
+
+    @Override
+    public List<Reaction> getAllReactions() {
+        return List.copyOf(this.reactions.values());
     }
 }
