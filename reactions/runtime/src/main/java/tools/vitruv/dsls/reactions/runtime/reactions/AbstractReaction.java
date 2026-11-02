@@ -14,7 +14,7 @@ import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
  * propagated through all routines and their used facades.
  */
 public abstract class AbstractReaction extends CallHierarchyHaving implements Reaction {
-  private final Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator;
+  private Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator;
 
   /**
    * Assigns routinesFacadeGenerator to retrieve routine facades from.
@@ -24,6 +24,12 @@ public abstract class AbstractReaction extends CallHierarchyHaving implements Re
   protected AbstractReaction(
       Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
     this.routinesFacadeGenerator = routinesFacadeGenerator;
+  }
+
+  public AbstractReaction() {}
+
+  public void setRoutinesFacadesGenerator(Function<ReactionExecutionState, RoutinesFacade> gen) {
+    this.routinesFacadeGenerator = gen;
   }
 
   @Override

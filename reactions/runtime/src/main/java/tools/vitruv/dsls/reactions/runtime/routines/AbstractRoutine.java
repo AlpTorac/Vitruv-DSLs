@@ -28,10 +28,10 @@ import tools.vitruv.dsls.reactions.runtime.structure.Loggable;
  * AbstractRoutine provides a base implementation of a {@link Routine}.
  */
 public abstract class AbstractRoutine extends CallHierarchyHaving implements Routine {
-  private final AbstractRoutinesFacade routinesFacade;
+  private AbstractRoutinesFacade routinesFacade;
 
   @Extension
-  @Getter(AccessLevel.PROTECTED) private final ReactionExecutionState executionState;
+  @Getter(AccessLevel.PROTECTED) private ReactionExecutionState executionState;
 
   /**
    * Creates a new AbstractRoutine.
@@ -47,6 +47,16 @@ public abstract class AbstractRoutine extends CallHierarchyHaving implements Rou
     super(calledBy);
     this.routinesFacade = routinesFacade;
     this.executionState = executionState;
+  }
+
+  public AbstractRoutine() {}
+
+  public void setRoutinesFacade(AbstractRoutinesFacade routinesFacade) {
+    this.routinesFacade = routinesFacade;
+  }
+
+  public void setReactionExecutionState(ReactionExecutionState state) {
+    this.executionState = state;
   }
 
   /**

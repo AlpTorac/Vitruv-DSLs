@@ -21,7 +21,7 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
    */
   private final Map<ReactionsImportPath, AbstractRoutinesFacade> routinesFacades = new HashMap<>();
 
-  private final ReactionExecutionState executionState;
+  private ReactionExecutionState executionState;
   
   /**
    * Creates a new {@link AbstractRoutinesFacadesProvider}.
@@ -29,6 +29,12 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
    * @param executionState - {@link ReactionExecutionState}
    */
   protected AbstractRoutinesFacadesProvider(ReactionExecutionState executionState) {
+    this.executionState = executionState;
+  }
+
+  public AbstractRoutinesFacadesProvider() {}
+
+  public void setReactionExecutionState(ReactionExecutionState executionState) {
     this.executionState = executionState;
   }
 

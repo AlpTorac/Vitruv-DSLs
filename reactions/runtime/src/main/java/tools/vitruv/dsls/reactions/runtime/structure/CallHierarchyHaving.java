@@ -11,7 +11,7 @@ import tools.vitruv.dsls.reactions.runtime.routines.Routine;
  */
 public class CallHierarchyHaving extends Loggable {
   @Getter(AccessLevel.PROTECTED) 
-  private final CallHierarchyHaving calledBy;
+  private CallHierarchyHaving calledBy;
 
   /**
    * Creates a new CallHierarchyHaving object without caller.
@@ -26,6 +26,10 @@ public class CallHierarchyHaving extends Loggable {
    * @param calledBy - CallHierarchyHaving
    */
   public CallHierarchyHaving(CallHierarchyHaving calledBy) {
+    this.calledBy = calledBy;
+  }
+
+  public void setCallHierarchyHaving(CallHierarchyHaving calledBy) {
     this.calledBy = calledBy;
   }
 

@@ -1,7 +1,5 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
@@ -25,7 +23,7 @@ public abstract class AbstractReactionsChangePropagationSpecification
   private static Logger logger = LogManager.getLogger(
       AbstractReactionsChangePropagationSpecification.class);
 
-  private final List<Reaction> reactions;
+  private ReactionsContainer reactions;
 
   /**
    * Creates an {@link AbstractReactionsChangePropagationSpecification} without reactions 
@@ -38,8 +36,26 @@ public abstract class AbstractReactionsChangePropagationSpecification
       MetamodelDescriptor sourceMetamodelDescriptor,
       MetamodelDescriptor targetMetamodelDescriptor) {
     super(sourceMetamodelDescriptor, targetMetamodelDescriptor);
-    this.reactions = new ArrayList<>();
+    this.reactions = new DefaultReactionsContainer();
     this.setup();
+  }
+
+  public AbstractReactionsChangePropagationSpecification(
+      MetamodelDescriptor sourceMetamodelDescriptor,
+      MetamodelDescriptor targetMetamodelDescriptor,
+    ReactionsContainer container) {
+    super(sourceMetamodelDescriptor, targetMetamodelDescriptor);
+    this.reactions = container;
+    this.setup();
+  }
+
+  public void setReactionsContainer(ReactionsContainer con) {
+    this.reactions = con;
+    this.setup();
+  }
+
+  public ReactionsContainer getReactionsContainer() {
+    return this.reactions;
   }
 
   /**
@@ -47,8 +63,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
    *
    * @param reaction - {@link Reaction}
    */
-  protected void addReaction(Reaction reaction) {
-    this.reactions.add(reaction);
+  public void addReaction(Reaction reaction) {
+    this.reactions.addReaction(reaction);
   }
 
   /**
@@ -61,6 +77,15 @@ public abstract class AbstractReactionsChangePropagationSpecification
     return true;
   }
 
+  protected ReactionExecutionState getState(EditableCorrespondenceModelView<Correspondence> correspondenceModel, 
+      ResourceAccess resourceAccess) {
+    return new ReactionExecutionState(
+          getUserInteractor(),
+          getReactionsView(correspondenceModel),
+          resourceAccess,
+          this);
+  }
+
   /**
    * {@inheritDoc}
    * These modifications happen by executing all reactions this specification has.
@@ -71,16 +96,7 @@ public abstract class AbstractReactionsChangePropagationSpecification
       ResourceAccess resourceAccess) {
     logger.trace("Call relevant reactions from %s to %s", 
         getSourceMetamodelDescriptor(), getTargetMetamodelDescriptor());
-    for (var reaction : reactions) {
-      logger.trace("Calling reaction: %s with change: %s",
-          reaction.getClass().getSimpleName(), change);
-      var executionState = new ReactionExecutionState(
-          getUserInteractor(),
-          getReactionsView(correspondenceModel),
-          resourceAccess,
-          this);
-      reaction.execute(change, executionState);
-    }
+    reactions.propagateChange(change, getState(correspondenceModel,resourceAccess));
   }
   
   private static EditableCorrespondenceModelView<ReactionsCorrespondence> getReactionsView(

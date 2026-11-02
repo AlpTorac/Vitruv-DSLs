@@ -16,12 +16,12 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
   /** 
    * Used by concrete implementations to request routines facades of executed routines.
    */
-  private final RoutinesFacadesProvider routinesFacadesProvider;
+  private RoutinesFacadesProvider routinesFacadesProvider;
   /**
    * The absolute path inside the import hierarchy to the segment this routines facade belongs to.
    * Never null.
    */
-  private final ReactionsImportPath reactionsImportPath;
+  private ReactionsImportPath reactionsImportPath;
   /**
    * Shared execution state among all routines facades in the import hierarchy.
    */
@@ -41,12 +41,22 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
     this.reactionsImportPath = reactionsImportPath;
   }
 
+  public AbstractRoutinesFacade() {}
+
+  public void setRoutinesFacadesProvider(RoutinesFacadesProvider routinesFacadesProvider) {
+    this.routinesFacadesProvider = routinesFacadesProvider;
+  }
+
+  public void setReactionsImportPath(ReactionsImportPath reactionsImportPath) {
+    this.reactionsImportPath = reactionsImportPath;
+  }
+
   /**
    * Returns the routine facade provider of this facade.
    *
    * @return routinesFacadesProvider
    */
-  protected RoutinesFacadesProvider getRoutinesFacadesProvider() {
+  public RoutinesFacadesProvider getRoutinesFacadesProvider() {
     return routinesFacadesProvider;
   }
 
@@ -55,7 +65,7 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
    *
    * @return reactionsImportPath
    */
-  protected ReactionsImportPath getReactionsImportPath() {
+  public ReactionsImportPath getReactionsImportPath() {
     return reactionsImportPath;
   }
 

@@ -22,4 +22,8 @@ public interface RoutinesFacadesProvider {
    *      routines facade.
    */
   <T extends AbstractRoutinesFacade> T getRoutinesFacade(ReactionsImportPath reactionsImportPath);
+
+  default <T extends AbstractRoutinesFacade> T getRoutinesFacade(String reactionID) {
+    return getRoutinesFacade(ReactionsImportPath.fromPathString(reactionID));
+  }
 }
