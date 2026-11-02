@@ -67,6 +67,10 @@ public abstract class AbstractReactionsChangePropagationSpecification
     this.reactions.addReaction(reaction);
   }
 
+  public void addReaction(String reactionID, Reaction reaction) {
+    this.reactions.addReaction(reactionID, reaction);
+  }
+
   /**
    * {@inheritDoc}
    * By default, an {@link AbstractReactionsChangePropagationSpecification} handles any change.
