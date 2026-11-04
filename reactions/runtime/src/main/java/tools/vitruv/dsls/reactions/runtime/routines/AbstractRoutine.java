@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.val;
 
 import org.apache.logging.log4j.Logger;
@@ -17,21 +15,24 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.Exceptions;
 import org.eclipse.xtext.xbase.lib.Extension;
+
+import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
 import tools.vitruv.dsls.reactions.runtime.helper.PersistenceHelper;
+import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
+import tools.vitruv.dsls.reactions.runtime.structure.AbstractReactionsChangePropagationAction;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 import tools.vitruv.dsls.reactions.runtime.structure.Loggable;
 
 /**
  * AbstractRoutine provides a base implementation of a {@link Routine}.
  */
-public abstract class AbstractRoutine extends CallHierarchyHaving implements Routine {
+public abstract class AbstractRoutine extends AbstractReactionsChangePropagationAction implements Routine {
   private AbstractRoutinesFacade routinesFacade;
 
-  @Extension
-  @Getter(AccessLevel.PROTECTED) private ReactionExecutionState executionState;
+  private ReactionExecutionState executionState;
 
   /**
    * Creates a new AbstractRoutine.
@@ -55,7 +56,11 @@ public abstract class AbstractRoutine extends CallHierarchyHaving implements Rou
     this.routinesFacade = routinesFacade;
   }
 
-  public void setReactionExecutionState(ReactionExecutionState state) {
+  public ReactionExecutionState getExecutionState() {
+    return this.executionState;
+  }
+
+  public void setExecutionState(ReactionExecutionState state) {
     this.executionState = state;
   }
 
@@ -85,6 +90,11 @@ public abstract class AbstractRoutine extends CallHierarchyHaving implements Rou
     return success;
   }
 
+  @Override
+  public Object executeAction(EChange<EObject> change, ReactionExecutionState state) {
+    return execute();
+  }
+
   /**
    * Executes the routine and modifies the underlying models. May also persist the modified models.
    *
@@ -110,6 +120,10 @@ public abstract class AbstractRoutine extends CallHierarchyHaving implements Rou
       this.correspondenceModel = correspondenceModel;
     }
 
+    public AbstractReactionsChangePropagationSpecification getCPS(ReactionExecutionState state) {
+      return ((AbstractReactionsChangePropagationSpecification) state.changePropagationObservable());
+    }
+  
     /**
      * Tests that some model element of type <code>expectedType</code> 
      *    corresponds to <code>correspondenceSource</code>.
@@ -285,6 +299,10 @@ public abstract class AbstractRoutine extends CallHierarchyHaving implements Rou
       this.executionState = executionState;
     }
 
+    public AbstractReactionsChangePropagationSpecification getCPS() {
+      return this.getCPS(executionState);
+    }
+  
     /**
      * Persists a given {@link EObject} as root object in the {@link Resource} 
      * at the specified path, relative to the project root folder.

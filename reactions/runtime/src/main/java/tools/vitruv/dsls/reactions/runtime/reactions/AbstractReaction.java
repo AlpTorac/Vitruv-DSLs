@@ -6,15 +6,15 @@ import org.eclipse.emf.ecore.EObject;
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
-import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
+import tools.vitruv.dsls.reactions.runtime.structure.AbstractReactionsChangePropagationAction;
 
 /**
  * An {@link AbstractReaction} retrieves a routines facade upon each execution and applies the
  * current execution's state to that facade such that it gets
  * propagated through all routines and their used facades.
  */
-public abstract class AbstractReaction extends CallHierarchyHaving implements Reaction {
-  private Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator;
+public abstract class AbstractReaction extends AbstractReactionsChangePropagationAction implements Reaction {
+  private AbstractReactionsChangePropagationSpecification cps;
 
   /**
    * Assigns routinesFacadeGenerator to retrieve routine facades from.
@@ -23,24 +23,36 @@ public abstract class AbstractReaction extends CallHierarchyHaving implements Re
    */
   protected AbstractReaction(
       Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-    this.routinesFacadeGenerator = routinesFacadeGenerator;
+        this.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
   }
 
   public AbstractReaction() {}
 
-  public void setRoutinesFacadesGenerator(Function<ReactionExecutionState, RoutinesFacade> gen) {
-    this.routinesFacadeGenerator = gen;
+  @Override
+  public AbstractReactionsChangePropagationSpecification getCPS() {
+    return this.cps;
+  }
+
+  @Override
+  public void setCPS(AbstractReactionsChangePropagationSpecification cps) {
+    this.cps = cps;
   }
 
   @Override
   public void execute(EChange<EObject> change, ReactionExecutionState reactionExecutionState) {
-    val routinesFacade = routinesFacadeGenerator.apply(reactionExecutionState);
+    val routinesFacade = this.getCPS().getReactionsContainer().getRoutinesFacadeGenerator(this.getID()).apply(reactionExecutionState);
     routinesFacade.pushCaller(this);
     try {
       executeReaction(change, reactionExecutionState, routinesFacade);
     } finally {
       routinesFacade.dropLastCaller();
     }
+  }
+
+  @Override
+  public Object executeAction(EChange<EObject> change, ReactionExecutionState state) {
+      execute(change, state);
+      return true;
   }
 
   /**

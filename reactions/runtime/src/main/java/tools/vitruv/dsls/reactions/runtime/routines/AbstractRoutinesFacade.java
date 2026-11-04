@@ -1,5 +1,6 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Deque;
 import java.util.LinkedList;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
@@ -42,6 +43,25 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
   }
 
   public AbstractRoutinesFacade() {}
+
+  @Override
+  public Object executeRoutine(String routineName, Class<?>[] paramClss, Object[] params) {
+      /*
+        FIXME: There is currently no way to cleanly execute a Routine through an
+        arbitrary RoutinesFacade, since concrete RoutinesFacades declare methods
+        that find and call the Routines, hence the usage of the reflection library
+      */
+
+      java.lang.reflect.Method routineCallMethod = null;
+      Object result = null;
+      try {
+        routineCallMethod = this.getClass().getDeclaredMethod(routineName, paramClss);
+        result = routineCallMethod.invoke(this, params);
+      } catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
+        throw new IllegalStateException("No such routine found: " + routineName);
+      }
+      return result;
+  }
 
   public void setRoutinesFacadesProvider(RoutinesFacadesProvider routinesFacadesProvider) {
     this.routinesFacadesProvider = routinesFacadesProvider;

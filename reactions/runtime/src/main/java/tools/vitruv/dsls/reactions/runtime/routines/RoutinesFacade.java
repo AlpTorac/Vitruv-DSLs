@@ -1,5 +1,7 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
+import java.util.List;
+
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 
@@ -41,4 +43,9 @@ public interface RoutinesFacade {
    * Drops the last caller from the call stack.
    */
   void dropLastCaller();
+
+  Object executeRoutine(String routineID, Class<?>[] paramClss, Object[] params);
+  default Object executeRoutine(String routineID, Object[] params) {
+    return executeRoutine(routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
+  }
 }

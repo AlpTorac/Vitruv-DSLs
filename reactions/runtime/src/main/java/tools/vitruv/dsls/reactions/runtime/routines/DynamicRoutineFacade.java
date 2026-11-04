@@ -15,7 +15,7 @@ public class DynamicRoutineFacade extends AbstractRoutinesFacade {
         var routine = routineGen.get();
         routine.setCallHierarchyHaving(this.getCurrentCaller());
         routine.setRoutinesFacade(this);
-        routine.setReactionExecutionState(getExecutionState());
+        routine.setExecutionState(getExecutionState());
         System.out.println("Dynamic routine facade directed to: " + routine);
         return routine.execute();
     }

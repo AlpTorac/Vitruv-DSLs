@@ -3,27 +3,32 @@ package tools.vitruv.dsls.reactions.runtime.reactions;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
 public class DefaultReactionsContainer implements ReactionsContainer {
-    private final Map<String, Reaction> reactions;
+    private Map<String, Function<ReactionExecutionState, RoutinesFacade>> routineFacadeGenerators;
+    private Map<String, Reaction> reactions;
 
     public DefaultReactionsContainer() {
+        this.routineFacadeGenerators = new LinkedHashMap<>();
         this.reactions = new LinkedHashMap<>();
     }
 
     @Override
     public void addReaction(Reaction reaction) {
-        this.addReaction(reaction.getClass().getName(), reaction);
+        this.addReaction(reaction.getDefaultID(), reaction);
     }
 
     @Override
     public void addReaction(String reactionID, Reaction reaction) {
         this.reactions.put(reactionID, reaction);
+        reaction.setID(reactionID);
     }
 
     @Override
@@ -51,5 +56,47 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     @Override
     public List<Reaction> getAllReactions() {
         return List.copyOf(this.reactions.values());
+    }
+
+    @Override
+    public void setRoutinesFacadesGenerator(String id,
+            Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
+        this.routineFacadeGenerators.put(id, routinesFacadeGenerator);
+    }
+
+    @Override
+    public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator(String id) {
+        return this.routineFacadeGenerators.getOrDefault(id, null);
+    }
+
+    @Override
+    public Object performReaction(EChange<EObject> change, ReactionExecutionState state, String reactionID) {
+        return this.reactions.get(reactionID).executeAction(change, state);
+    }
+
+    @Override
+    public Object performRoutine(ReactionExecutionState state, String routineID, Class<?>[] paramClss,
+            Object[] params) {
+        return this.routineFacadeGenerators.get(routineID).apply(state).executeRoutine(routineID, paramClss, params);
+    }
+
+    @Override
+    public boolean hasReaction(String reactionID) {
+        return this.reactions.containsKey(reactionID);
+    }
+
+    @Override
+    public boolean hasRoutinesFacadesGenerator(String routineID) {
+        return this.routineFacadeGenerators.containsKey(routineID);
+    }
+
+    @Override
+    public Map<String, Function<ReactionExecutionState, RoutinesFacade>> getAllIdToRoutinesFacadesGeneratorMappings() {
+        return Map.copyOf(this.routineFacadeGenerators);
+    }
+
+    @Override
+    public Map<String, Reaction> getAllIdToReactionMappings() {
+        return Map.copyOf(this.reactions);
     }
 }
