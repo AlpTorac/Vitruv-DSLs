@@ -52,8 +52,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
   }
 
   public void setReactionsContainer(ReactionsContainer con) {
+    this.reactions.copyTo(con);
     this.reactions = con;
-    this.setup();
   }
 
   public ReactionsContainer getReactionsContainer() {
@@ -91,7 +91,6 @@ public abstract class AbstractReactionsChangePropagationSpecification
     reaction.setCPS(this);
     reaction.setID(reactionID);
     reaction.registerToCPS();
-    this.reactions.addReaction(reactionID, reaction);
   }
 
   /**
