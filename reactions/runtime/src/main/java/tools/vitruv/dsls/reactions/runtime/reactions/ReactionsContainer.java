@@ -37,6 +37,8 @@ public interface ReactionsContainer {
     public void addReaction(String reactionID, Reaction reaction);
 
     public Reaction removeReaction(String reactionID);
+    public Function<ReactionExecutionState, RoutinesFacade> removeRoutinesFacadesGenerator(String facadeID);
+    public void removeID(String id);
 
     public Reaction getReaction(String reactionID);
 

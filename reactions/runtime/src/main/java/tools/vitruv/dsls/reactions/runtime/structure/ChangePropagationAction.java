@@ -35,7 +35,6 @@ public interface ChangePropagationAction {
 
     public void registerRoutinesFacadesGenerator();
     public void registerRoutinesFacadesGenerator(Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator);
-    public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator();
 
     // public default RoutinesFacadesProvider getRoutinesFacadesProvider() {
     //     return this.getCPS().getReactionsContainer().getRoutinesFacadesProvider();

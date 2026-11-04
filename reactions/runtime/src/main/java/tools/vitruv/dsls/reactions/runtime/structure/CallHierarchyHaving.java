@@ -1,7 +1,5 @@
 package tools.vitruv.dsls.reactions.runtime.structure;
 
-import lombok.AccessLevel;
-import lombok.Getter;
 import tools.vitruv.dsls.reactions.runtime.reactions.Reaction;
 import tools.vitruv.dsls.reactions.runtime.routines.Routine;
 
@@ -10,7 +8,6 @@ import tools.vitruv.dsls.reactions.runtime.routines.Routine;
  * and {@link Routine}s at runtime.
  */
 public class CallHierarchyHaving extends Loggable {
-  @Getter(AccessLevel.PROTECTED) 
   private CallHierarchyHaving calledBy;
 
   /**
@@ -27,6 +24,10 @@ public class CallHierarchyHaving extends Loggable {
    */
   public CallHierarchyHaving(CallHierarchyHaving calledBy) {
     this.calledBy = calledBy;
+  }
+
+  public CallHierarchyHaving getCalledBy() {
+    return this.calledBy;
   }
 
   public void setCallHierarchyHaving(CallHierarchyHaving calledBy) {

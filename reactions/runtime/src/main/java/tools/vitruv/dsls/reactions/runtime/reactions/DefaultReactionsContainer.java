@@ -28,7 +28,6 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     @Override
     public void addReaction(String reactionID, Reaction reaction) {
         this.reactions.put(reactionID, reaction);
-        reaction.setID(reactionID);
     }
 
     @Override
@@ -98,5 +97,16 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     @Override
     public Map<String, Reaction> getAllIdToReactionMappings() {
         return Map.copyOf(this.reactions);
+    }
+
+    @Override
+    public Function<ReactionExecutionState, RoutinesFacade> removeRoutinesFacadesGenerator(String facadeID) {
+        return this.routineFacadeGenerators.remove(facadeID);
+    }
+
+    @Override
+    public void removeID(String id) {
+        this.reactions.remove(id);
+        this.routineFacadeGenerators.remove(id);
     }
 }

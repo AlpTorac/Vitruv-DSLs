@@ -84,14 +84,11 @@ public abstract class AbstractReactionsChangePropagationSpecification
    * @param reaction - {@link Reaction}
    */
   public void addReaction(Reaction reaction) {
-    reaction.setCPS(this);
-    reaction.registerRoutinesFacadesGenerator();
-    this.reactions.addReaction(reaction);
+    this.addReaction(reaction.getID(), reaction);
   }
 
   public void addReaction(String reactionID, Reaction reaction) {
     reaction.setCPS(this);
-    reaction.registerRoutinesFacadesGenerator();
     this.reactions.addReaction(reactionID, reaction);
   }
 

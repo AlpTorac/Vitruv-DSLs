@@ -33,6 +33,21 @@ public abstract class AbstractReaction extends AbstractReactionsChangePropagatio
   }
 
   @Override
+  public void registerRoutinesFacadesGenerator(
+          Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
+      this.routinesFacadeGenerator = routinesFacadeGenerator;
+      super.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
+  }
+
+  @Override
+  protected void registerToCPS() {
+    if (this.getCPS() != null) {
+      this.getCPS().getReactionsContainer().addReaction(this.getID(), this);
+      this.registerRoutinesFacadesGenerator();
+    }
+  }
+
+  @Override
   public void execute(EChange<EObject> change, ReactionExecutionState reactionExecutionState) {
     val routinesFacade = this.getCPS().getReactionsContainer().getRoutinesFacadeGenerator(this.getID()).apply(reactionExecutionState);
     routinesFacade.pushCaller(this);

@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import lombok.val;
@@ -46,10 +47,13 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
       ReactionExecutionState executionState,
       CallHierarchyHaving calledBy) {
     super(calledBy);
-    this.setCPS((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
     this.routinesFacade = routinesFacade;
     this.executionState = executionState;
-    this.registerRoutinesFacadesGenerator();
+
+    // Register the routine here, since routine instances are built inside concrete
+    // RoutinesFacades and there is no way to access and modify the routine
+    // instantiation code there
+    this.setCPS((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
   }
 
   public AbstractRoutine() {}
@@ -80,6 +84,20 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
   @Override
   public void registerRoutinesFacadesGenerator() {
     this.registerRoutinesFacadesGenerator(state -> routinesFacade);
+  }
+
+  @Override
+  public void registerRoutinesFacadesGenerator(
+          Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
+      this.routinesFacade = (AbstractRoutinesFacade) routinesFacadeGenerator.apply(executionState);
+      super.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
+  }
+
+  @Override
+  protected void registerToCPS() {
+    if (this.getCPS() != null) {
+      this.registerRoutinesFacadesGenerator();
+    }
   }
 
   @Override

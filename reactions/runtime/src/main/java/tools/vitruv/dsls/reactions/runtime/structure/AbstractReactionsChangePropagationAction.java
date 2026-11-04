@@ -34,28 +34,23 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     }
 
     @Override
-    public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Class<?>[] paramClss, Object[] params) {
+    public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID,
+            Class<?>[] paramClss, Object[] params) {
         return this.getCPS().delegateToRoutine(state, facadeGenID, routineID, paramClss, params);
     }
 
     @Override
     public void setID(String id) {
+        if (this.getCPS() != null) {
+            this.getCPS().getReactionsContainer().removeID(id);
+        }
         this.id = id;
+        this.registerToCPS();
     }
 
     @Override
     public String getID() {
         return id;
-    }
-
-    @Override
-    public void setCallHierarchyHaving(CallHierarchyHaving caller) {
-        this.setCallHierarchyHaving(caller);
-    }
-
-    @Override
-    public CallHierarchyHaving getCalledBy() {
-        return this.getCalledBy();
     }
 
     @Override
@@ -95,6 +90,7 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     @Override
     public void setCPS(AbstractReactionsChangePropagationSpecification cps) {
         this.cps = cps;
+        this.registerToCPS();
     }
 
     @Override
@@ -111,11 +107,16 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     @Override
     public void registerRoutinesFacadesGenerator(
             Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-        this.getCPS().getReactionsContainer().setRoutinesFacadesGenerator(this.getID(), routinesFacadeGenerator);
+        if (this.getCPS() != null) {
+            this.getCPS().getReactionsContainer().setRoutinesFacadesGenerator(this.getID(), routinesFacadeGenerator);
+        }
     }
 
-    @Override
-    public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator() {
-        return this.getCPS().getReactionsContainer().getRoutinesFacadeGenerator(this.getID());
+    protected void deregisterFromCPS() {
+        if (this.getCPS() != null) {
+            this.getCPS().getReactionsContainer().removeID(this.getID());
+        }
     }
+
+    protected abstract void registerToCPS();
 }
