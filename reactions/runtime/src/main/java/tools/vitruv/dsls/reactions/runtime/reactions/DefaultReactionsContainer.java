@@ -22,7 +22,7 @@ public class DefaultReactionsContainer implements ReactionsContainer {
 
     @Override
     public void addReaction(Reaction reaction) {
-        this.addReaction(reaction.getDefaultID(), reaction);
+        this.addReaction(reaction.getID(), reaction);
     }
 
     @Override

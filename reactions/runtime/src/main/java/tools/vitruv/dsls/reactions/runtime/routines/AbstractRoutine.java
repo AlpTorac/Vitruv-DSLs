@@ -54,6 +54,7 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
     // RoutinesFacades and there is no way to access and modify the routine
     // instantiation code there
     this.setCPS((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
+    this.registerToCPS();
   }
 
   public AbstractRoutine() {}
@@ -94,7 +95,7 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
   }
 
   @Override
-  protected void registerToCPS() {
+  public void registerToCPS() {
     if (this.getCPS() != null) {
       this.registerRoutinesFacadesGenerator();
     }

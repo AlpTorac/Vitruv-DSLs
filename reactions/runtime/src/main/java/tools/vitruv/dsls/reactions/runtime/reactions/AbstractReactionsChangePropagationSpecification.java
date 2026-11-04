@@ -89,6 +89,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
 
   public void addReaction(String reactionID, Reaction reaction) {
     reaction.setCPS(this);
+    reaction.setID(reactionID);
+    reaction.registerToCPS();
     this.reactions.addReaction(reactionID, reaction);
   }
 

@@ -41,11 +41,7 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
 
     @Override
     public void setID(String id) {
-        if (this.getCPS() != null) {
-            this.getCPS().getReactionsContainer().removeID(id);
-        }
         this.id = id;
-        this.registerToCPS();
     }
 
     @Override
@@ -90,7 +86,6 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     @Override
     public void setCPS(AbstractReactionsChangePropagationSpecification cps) {
         this.cps = cps;
-        this.registerToCPS();
     }
 
     @Override
@@ -112,11 +107,9 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
         }
     }
 
-    protected void deregisterFromCPS() {
+    public void deregisterFromCPS() {
         if (this.getCPS() != null) {
             this.getCPS().getReactionsContainer().removeID(this.getID());
         }
     }
-
-    protected abstract void registerToCPS();
 }

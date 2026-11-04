@@ -40,7 +40,7 @@ public abstract class AbstractReaction extends AbstractReactionsChangePropagatio
   }
 
   @Override
-  protected void registerToCPS() {
+  public void registerToCPS() {
     if (this.getCPS() != null) {
       this.getCPS().getReactionsContainer().addReaction(this.getID(), this);
       this.registerRoutinesFacadesGenerator();
