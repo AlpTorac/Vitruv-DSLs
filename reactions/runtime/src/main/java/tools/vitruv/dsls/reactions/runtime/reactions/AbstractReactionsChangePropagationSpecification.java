@@ -65,17 +65,17 @@ public abstract class AbstractReactionsChangePropagationSpecification
       return container.hasReaction(reactionID) ? container.performReaction(change, state, reactionID) : null;
   }
 
-  public Object delegateToRoutine(ReactionExecutionState state, String routineID, Class<?>[] paramClss, Object[] params) {
+  public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Class<?>[] paramClss, Object[] params) {
       var container = getReactionsContainer();
-      if (container.hasRoutinesFacadesGenerator(routineID)) {
-          return paramClss == null ? container.performRoutine(state, routineID, params)
-                  : container.performRoutine(state, routineID, paramClss, params);
+      if (container.hasRoutinesFacadesGenerator(facadeGenID)) {
+          return paramClss == null ? container.performRoutine(state, facadeGenID, routineID, params)
+                  : container.performRoutine(state, facadeGenID, routineID, paramClss, params);
       }
       return null;
   }
 
-  public Object delegateToRoutine(ReactionExecutionState state, String routineID, Object[] params) {
-    return delegateToRoutine(state, routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
+  public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Object[] params) {
+    return delegateToRoutine(state, facadeGenID, routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
   }
 
   /**
@@ -84,10 +84,14 @@ public abstract class AbstractReactionsChangePropagationSpecification
    * @param reaction - {@link Reaction}
    */
   public void addReaction(Reaction reaction) {
+    reaction.setCPS(this);
+    reaction.registerRoutinesFacadesGenerator();
     this.reactions.addReaction(reaction);
   }
 
   public void addReaction(String reactionID, Reaction reaction) {
+    reaction.setCPS(this);
+    reaction.registerRoutinesFacadesGenerator();
     this.reactions.addReaction(reactionID, reaction);
   }
 

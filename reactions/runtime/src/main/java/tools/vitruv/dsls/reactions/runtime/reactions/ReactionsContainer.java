@@ -17,15 +17,15 @@ public interface ReactionsContainer {
 
     public Object performReaction(EChange<EObject> change, ReactionExecutionState state, String reactionID);
 
-    public Object performRoutine(ReactionExecutionState state, String routineName, Class<?>[] paramClss,
+    public Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName, Class<?>[] paramClss,
             Object[] params);
 
-    public default Object performRoutine(ReactionExecutionState state, String routineID, Object[] params) {
-        return performRoutine(state, routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new),
+    public default Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName, Object[] params) {
+        return performRoutine(state, facadeGenID, routineName, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new),
                 params);
     }
 
-    public void setRoutinesFacadesGenerator(String id,
+    public void setRoutinesFacadesGenerator(String facadeGenID,
             Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator);
 
     public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator(String id);

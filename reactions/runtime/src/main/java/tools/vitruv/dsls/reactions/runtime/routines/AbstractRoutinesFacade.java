@@ -3,6 +3,10 @@ package tools.vitruv.dsls.reactions.runtime.routines;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
+
+import com.google.common.collect.Lists;
+
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 import tools.vitruv.dsls.reactions.runtime.structure.Loggable;
@@ -44,6 +48,43 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
 
   public AbstractRoutinesFacade() {}
 
+  private java.lang.reflect.Method findRoutineCallMethod(String routineName, Class<?>[] paramClss) {
+      /*
+        FIXME: There is currently no way to cleanly execute a Routine through an
+        arbitrary RoutinesFacade, since concrete RoutinesFacades declare methods
+        that find and call the Routines, hence the usage of the reflection library
+      */
+
+      try {
+        var metMatches = Lists.newArrayList(this.getClass().getDeclaredMethods());
+
+        // Eliminate methods with mismatching parameter count
+        metMatches.removeIf(m -> m.getParameterCount() != paramClss.length);
+        if (metMatches.size() == 1) {
+          return metMatches.get(0);
+        }
+
+        // Eliminate methods with mismatching names
+        metMatches.removeIf(m -> !m.getName().equals(routineName));
+        if (metMatches.size() == 1) {
+          return metMatches.get(0);
+        }
+
+        // Filter by param types, look for signature compatibility
+        for (int i = 0; i < paramClss.length; i++) {
+          final var idx = i;
+          metMatches.removeIf(m -> !m.getParameters()[idx].getType().isAssignableFrom(paramClss[idx]));
+          if (metMatches.size() == 1) {
+            return metMatches.get(0);
+          }
+        }
+
+        return null;
+      } catch (SecurityException e) {
+        throw new IllegalStateException("Security exception while looking for: " + routineName, e);
+      }
+  }
+
   @Override
   public Object executeRoutine(String routineName, Class<?>[] paramClss, Object[] params) {
       /*
@@ -52,13 +93,12 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
         that find and call the Routines, hence the usage of the reflection library
       */
 
-      java.lang.reflect.Method routineCallMethod = null;
-      Object result = null;
+      java.lang.reflect.Method routineCallMethod = findRoutineCallMethod(routineName, paramClss);
+      Object result;
       try {
-        routineCallMethod = this.getClass().getDeclaredMethod(routineName, paramClss);
         result = routineCallMethod.invoke(this, params);
-      } catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
-        throw new IllegalStateException("No such routine found: " + routineName);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        throw new IllegalArgumentException("Exception while calling: " + routineName, e);
       }
       return result;
   }

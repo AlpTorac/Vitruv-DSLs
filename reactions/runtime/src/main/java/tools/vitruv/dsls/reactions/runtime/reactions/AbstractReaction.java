@@ -14,8 +14,7 @@ import tools.vitruv.dsls.reactions.runtime.structure.AbstractReactionsChangeProp
  * propagated through all routines and their used facades.
  */
 public abstract class AbstractReaction extends AbstractReactionsChangePropagationAction implements Reaction {
-  private AbstractReactionsChangePropagationSpecification cps;
-
+  private Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator;
   /**
    * Assigns routinesFacadeGenerator to retrieve routine facades from.
    *
@@ -23,19 +22,14 @@ public abstract class AbstractReaction extends AbstractReactionsChangePropagatio
    */
   protected AbstractReaction(
       Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-        this.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
+        this.routinesFacadeGenerator = routinesFacadeGenerator;
   }
 
   public AbstractReaction() {}
 
   @Override
-  public AbstractReactionsChangePropagationSpecification getCPS() {
-    return this.cps;
-  }
-
-  @Override
-  public void setCPS(AbstractReactionsChangePropagationSpecification cps) {
-    this.cps = cps;
+  public void registerRoutinesFacadesGenerator() {
+    this.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
   }
 
   @Override

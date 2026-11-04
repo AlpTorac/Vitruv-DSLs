@@ -34,8 +34,8 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     }
 
     @Override
-    public Object delegateToRoutine(ReactionExecutionState state, String routineID, Class<?>[] paramClss, Object[] params) {
-        return this.getCPS().delegateToRoutine(state, routineID, paramClss, params);
+    public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Class<?>[] paramClss, Object[] params) {
+        return this.getCPS().delegateToRoutine(state, facadeGenID, routineID, paramClss, params);
     }
 
     @Override

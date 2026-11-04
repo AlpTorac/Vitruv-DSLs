@@ -46,8 +46,10 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
       ReactionExecutionState executionState,
       CallHierarchyHaving calledBy) {
     super(calledBy);
+    this.setCPS((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
     this.routinesFacade = routinesFacade;
     this.executionState = executionState;
+    this.registerRoutinesFacadesGenerator();
   }
 
   public AbstractRoutine() {}
@@ -73,6 +75,11 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
    */
   protected <T extends AbstractRoutinesFacade> T getRoutinesFacade() {
     return (T) routinesFacade;
+  }
+
+  @Override
+  public void registerRoutinesFacadesGenerator() {
+    this.registerRoutinesFacadesGenerator(state -> routinesFacade);
   }
 
   @Override

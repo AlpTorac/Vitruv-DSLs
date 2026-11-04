@@ -59,14 +59,14 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     }
 
     @Override
-    public void setRoutinesFacadesGenerator(String id,
+    public void setRoutinesFacadesGenerator(String facadeGenID,
             Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-        this.routineFacadeGenerators.put(id, routinesFacadeGenerator);
+        this.routineFacadeGenerators.put(facadeGenID, routinesFacadeGenerator);
     }
 
     @Override
-    public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator(String id) {
-        return this.routineFacadeGenerators.getOrDefault(id, null);
+    public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator(String facadeGenID) {
+        return this.routineFacadeGenerators.getOrDefault(facadeGenID, null);
     }
 
     @Override
@@ -75,9 +75,9 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     }
 
     @Override
-    public Object performRoutine(ReactionExecutionState state, String routineID, Class<?>[] paramClss,
+    public Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Class<?>[] paramClss,
             Object[] params) {
-        return this.routineFacadeGenerators.get(routineID).apply(state).executeRoutine(routineID, paramClss, params);
+        return this.routineFacadeGenerators.get(facadeGenID).apply(state).executeRoutine(routineID, paramClss, params);
     }
 
     @Override

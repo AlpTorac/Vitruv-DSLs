@@ -14,15 +14,15 @@ import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 public interface ChangePropagationAction {
     public Object delegateToReaction(EChange<EObject> change, ReactionExecutionState state, String reactionID);
 
-    public Object delegateToRoutine(ReactionExecutionState state, String id, Class<?>[] paramClss, Object[] params);
-    public default Object delegateToRoutine(ReactionExecutionState state, String id, Object[] params) {
-        return delegateToRoutine(state, id, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
+    public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineName, Class<?>[] paramClss, Object[] params);
+    public default Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineName, Object[] params) {
+        return delegateToRoutine(state, facadeGenID, routineName, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
     }
 
     public Object executeAction(EChange<EObject> change, ReactionExecutionState state);
 
     public default String getDefaultID() {
-        return this.getClass().getName();
+        return this.getClass().getSimpleName();
     }
     public void setID(String id);
     public String getID();
@@ -33,6 +33,7 @@ public interface ChangePropagationAction {
     public void setCPS(AbstractReactionsChangePropagationSpecification cps);
     public AbstractReactionsChangePropagationSpecification getCPS();
 
+    public void registerRoutinesFacadesGenerator();
     public void registerRoutinesFacadesGenerator(Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator);
     public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator();
 
