@@ -45,6 +45,9 @@ public interface RoutinesFacade {
   void dropLastCaller();
 
   Object executeRoutine(String routineID, Class<?>[] paramClss, Object[] params);
+  default Object executeRoutine(String routineID) {
+    return executeRoutine(routineID, null, null);
+  }
   default Object executeRoutine(String routineID, Object[] params) {
     return executeRoutine(routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
   }

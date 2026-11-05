@@ -21,6 +21,10 @@ public interface ReactionsContainer {
 			Class<?>[] paramClss,
 			Object[] params);
 
+	public default Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName) {
+		return performRoutine(state, facadeGenID, routineName, null, null);
+	}
+
 	public default Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName,
 			Object[] params) {
 		return performRoutine(state, facadeGenID, routineName,
@@ -35,11 +39,19 @@ public interface ReactionsContainer {
 
 	public Map<String, Function<ReactionExecutionState, RoutinesFacade>> getAllIdToRoutinesFacadesGeneratorMappings();
 
-	public void addReaction(Reaction reaction);
+	public default void addReaction(Reaction reaction) {
+		this.addReaction(reaction.getID(), reaction);
+	}
 
 	public void addReaction(String reactionID, Reaction reaction);
 
 	public Reaction removeReaction(String reactionID);
+
+	public default Reaction overrideExistingReaction(Reaction newReaction) {
+		return this.overrideExistingReaction(newReaction.getID(), newReaction);
+	}
+
+	public Reaction overrideExistingReaction(String reactionID, Reaction newReaction);
 
 	public Function<ReactionExecutionState, RoutinesFacade> removeRoutinesFacadesGenerator(String facadeID);
 

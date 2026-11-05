@@ -21,13 +21,13 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     }
 
     @Override
-    public void addReaction(Reaction reaction) {
-        this.addReaction(reaction.getID(), reaction);
+    public void addReaction(String reactionID, Reaction reaction) {
+        this.reactions.putIfAbsent(reactionID, reaction);
     }
 
     @Override
-    public void addReaction(String reactionID, Reaction reaction) {
-        this.reactions.put(reactionID, reaction);
+    public Reaction overrideExistingReaction(String reactionID, Reaction newReaction) {
+        return this.reactions.put(reactionID, newReaction);
     }
 
     @Override
@@ -42,19 +42,18 @@ public class DefaultReactionsContainer implements ReactionsContainer {
 
     @Override
     public void propagateChange(EChange<EObject> change, ReactionExecutionState state) {
-        for (var reaction : reactions.values()) {
-            reaction.execute(change, state);
-        }
+        reactions.forEach((id, reaction) -> reaction.execute(change, state));
     }
 
     @Override
     public void clear() {
         this.reactions.clear();
+        this.routineFacadeGenerators.clear();
     }
 
     @Override
     public List<Reaction> getAllReactions() {
-        return List.copyOf(this.reactions.values());
+        return List.copyOf(reactions.values());
     }
 
     @Override
@@ -74,7 +73,8 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     }
 
     @Override
-    public Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Class<?>[] paramClss,
+    public Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineID,
+            Class<?>[] paramClss,
             Object[] params) {
         return this.routineFacadeGenerators.get(facadeGenID).apply(state).executeRoutine(routineID, paramClss, params);
     }
@@ -91,12 +91,12 @@ public class DefaultReactionsContainer implements ReactionsContainer {
 
     @Override
     public Map<String, Function<ReactionExecutionState, RoutinesFacade>> getAllIdToRoutinesFacadesGeneratorMappings() {
-        return Map.copyOf(this.routineFacadeGenerators);
+        return new LinkedHashMap<>(this.routineFacadeGenerators);
     }
 
     @Override
     public Map<String, Reaction> getAllIdToReactionMappings() {
-        return Map.copyOf(this.reactions);
+        return new LinkedHashMap<>(this.reactions);
     }
 
     @Override

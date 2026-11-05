@@ -17,7 +17,7 @@ public class DynamicRoutineFacade extends AbstractRoutinesFacade {
         this.ro.putAll(extensions);
     }
 
-    public boolean executeRoutine(String routineID) {
+    public Object executeRoutine(String routineID) {
         var routineGen = this.ro.get(routineID);
         var routine = routineGen.get();
         routine.setCallHierarchyHaving(this.getCurrentCaller());
