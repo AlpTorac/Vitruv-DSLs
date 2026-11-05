@@ -8,8 +8,14 @@ import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 public class DefaultChangePropagationControlFlow extends AbstractChangePropagationControlFlow {
     @Override
     public void propagateChange(EChange<EObject> change, ReactionExecutionState state) {
-        this.setExecutionState(state);
-        getActionContainer().getAllReactions().forEach(reaction -> reaction.execute(change, state));
+        var reactions = ((AbstractReactionsChangePropagationSpecification) state.changePropagationObservable())
+                .getActionContainer()
+                .getAllReactions();
+        // Deliberately do not use reactions.forEach(...), so that exceptions are not
+        // sneakily eaten
+        for (var reaction : reactions) {
+            reaction.execute(change, state);
+        }
     }
 
     @Override

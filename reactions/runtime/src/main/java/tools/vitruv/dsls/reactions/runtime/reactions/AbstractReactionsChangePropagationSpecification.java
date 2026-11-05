@@ -66,6 +66,10 @@ public abstract class AbstractReactionsChangePropagationSpecification
     this.setup();
   }
 
+  public void setRootControlFlowID(String rootControlFlowID) {
+    this.rootControlFlowID = rootControlFlowID;
+  }
+
   public String getRootControlFlowID() {
     return this.rootControlFlowID;
   }
