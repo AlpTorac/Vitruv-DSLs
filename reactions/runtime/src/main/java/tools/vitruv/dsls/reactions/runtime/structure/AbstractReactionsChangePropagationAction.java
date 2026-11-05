@@ -2,20 +2,15 @@ package tools.vitruv.dsls.reactions.runtime.structure;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 
-import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
-import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
-import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
+import tools.vitruv.dsls.reactions.runtime.reactions.ChangePropagationControlFlow;
 
 public abstract class AbstractReactionsChangePropagationAction extends CallHierarchyHaving
         implements ChangePropagationAction {
     private String id;
-    private AbstractReactionsChangePropagationSpecification cps;
 
     private final Map<String, Object> paramNameToVal = new LinkedHashMap<>();
 
@@ -29,14 +24,22 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     }
 
     @Override
-    public Object delegateToReaction(EChange<EObject> change, ReactionExecutionState state, String reactionID) {
-        return this.getCPS().delegateToReaction(change, state, reactionID);
-    }
+    public ChangePropagationControlFlow getCallingControlFlow() {
+        ChangePropagationControlFlow oldestControlFlow = null;
+        if (this instanceof ChangePropagationControlFlow _this) {
+            oldestControlFlow = _this;
+        }
 
-    @Override
-    public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID,
-            Class<?>[] paramClss, Object[] params) {
-        return this.getCPS().delegateToRoutine(state, facadeGenID, routineID, paramClss, params);
+        CallHierarchyHaving oldestCalledBy = this;
+        
+        // Assume that there are no cycles in the CallHierarchyHaving tree
+        while (oldestCalledBy != null) {
+            oldestCalledBy = oldestCalledBy.getCalledBy();
+            if (oldestCalledBy instanceof ChangePropagationControlFlow cpa) {
+                oldestControlFlow = cpa;
+            }
+        }
+        return oldestControlFlow;
     }
 
     @Override
@@ -83,33 +86,9 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
         return this.paramNameToVal.containsKey(paramName);
     }
 
-    @Override
-    public void setCPS(AbstractReactionsChangePropagationSpecification cps) {
-        this.cps = cps;
-    }
-
-    @Override
-    public AbstractReactionsChangePropagationSpecification getCPS() {
-        return this.cps;
-    }
-
     protected URI getFullEObjectURI(EObject eobj) {
         return eobj.eResource().getURI()
                 .appendFragment(
                         eobj.eResource().getURIFragment(eobj));
-    }
-
-    @Override
-    public void registerRoutinesFacadesGenerator(
-            Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-        if (this.getCPS() != null) {
-            this.getCPS().getReactionsContainer().setRoutinesFacadesGenerator(this.getID(), routinesFacadeGenerator);
-        }
-    }
-
-    public void deregisterFromCPS() {
-        if (this.getCPS() != null) {
-            this.getCPS().getReactionsContainer().removeID(this.getID());
-        }
     }
 }

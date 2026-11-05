@@ -27,29 +27,29 @@ public abstract class AbstractReaction extends AbstractReactionsChangePropagatio
 
   public AbstractReaction() {}
 
-  @Override
-  public void registerRoutinesFacadesGenerator() {
-    this.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
+  public void setRoutinesFacadeGenerator(Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
+    this.routinesFacadeGenerator = routinesFacadeGenerator;
   }
 
-  @Override
-  public void registerRoutinesFacadesGenerator(
-          Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-      this.routinesFacadeGenerator = routinesFacadeGenerator;
-      super.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
+  public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator() {
+      return routinesFacadeGenerator;
   }
 
-  @Override
-  public void registerToCPS() {
-    if (this.getCPS() != null) {
-      this.getCPS().getReactionsContainer().addReaction(this.getID(), this);
-      this.registerRoutinesFacadesGenerator();
-    }
-  }
+  // @Override
+  // protected void deregister() {
+  //   getCallingControlFlow().getActionContainer().removeID(this.getID());
+  // }
+
+  // @Override
+  // protected void register() {
+  //   getCallingControlFlow().getActionContainer().addReaction(this);
+  //   getCallingControlFlow().getActionContainer().setRoutinesFacadesGenerator(this.getID(), routinesFacadeGenerator);
+  // }
 
   @Override
   public void execute(EChange<EObject> change, ReactionExecutionState reactionExecutionState) {
-    val routinesFacade = this.getCPS().getReactionsContainer().getRoutinesFacadeGenerator(this.getID()).apply(reactionExecutionState);
+    var cps = (AbstractReactionsChangePropagationSpecification) reactionExecutionState.changePropagationObservable();
+    val routinesFacade = cps.getActionContainer().getRoutinesFacadeGenerator(this.getID()).apply(reactionExecutionState);
     routinesFacade.pushCaller(this);
     try {
       executeReaction(change, reactionExecutionState, routinesFacade);

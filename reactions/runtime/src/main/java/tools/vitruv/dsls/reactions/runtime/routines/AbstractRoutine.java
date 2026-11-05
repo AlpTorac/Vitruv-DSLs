@@ -49,12 +49,6 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
     super(calledBy);
     this.routinesFacade = routinesFacade;
     this.executionState = executionState;
-
-    // Register the routine here, since routine instances are built inside concrete
-    // RoutinesFacades and there is no way to access and modify the routine
-    // instantiation code there
-    this.setCPS((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
-    this.registerToCPS();
   }
 
   public AbstractRoutine() {}
@@ -82,23 +76,8 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
     return (T) routinesFacade;
   }
 
-  @Override
-  public void registerRoutinesFacadesGenerator() {
-    this.registerRoutinesFacadesGenerator(state -> routinesFacade);
-  }
-
-  @Override
-  public void registerRoutinesFacadesGenerator(
-          Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-      this.routinesFacade = (AbstractRoutinesFacade) routinesFacadeGenerator.apply(executionState);
-      super.registerRoutinesFacadesGenerator(routinesFacadeGenerator);
-  }
-
-  @Override
-  public void registerToCPS() {
-    if (this.getCPS() != null) {
-      this.registerRoutinesFacadesGenerator();
-    }
+  public AbstractReactionsChangePropagationSpecification getCPS() {
+    return (AbstractReactionsChangePropagationSpecification) this.executionState.changePropagationObservable();
   }
 
   @Override

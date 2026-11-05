@@ -11,11 +11,13 @@ import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
-public class DefaultReactionsContainer implements ReactionsContainer {
+public class DefaultChangePropagationActionContainer implements ChangePropagationActionContainer {
+    private Map<String, ChangePropagationControlFlow> controlFlows;
     private Map<String, Function<ReactionExecutionState, RoutinesFacade>> routineFacadeGenerators;
     private Map<String, Reaction> reactions;
 
-    public DefaultReactionsContainer() {
+    public DefaultChangePropagationActionContainer() {
+        this.controlFlows = new LinkedHashMap<>();
         this.routineFacadeGenerators = new LinkedHashMap<>();
         this.reactions = new LinkedHashMap<>();
     }
@@ -41,14 +43,10 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     }
 
     @Override
-    public void propagateChange(EChange<EObject> change, ReactionExecutionState state) {
-        reactions.forEach((id, reaction) -> reaction.execute(change, state));
-    }
-
-    @Override
     public void clear() {
         this.reactions.clear();
         this.routineFacadeGenerators.clear();
+        this.controlFlows.clear();
     }
 
     @Override
@@ -108,5 +106,31 @@ public class DefaultReactionsContainer implements ReactionsContainer {
     public void removeID(String id) {
         this.reactions.remove(id);
         this.routineFacadeGenerators.remove(id);
+        this.controlFlows.remove(id);
+    }
+
+    @Override
+    public void addControlFlow(String controlFlowID, ChangePropagationControlFlow controlFlow) {
+        this.controlFlows.putIfAbsent(controlFlowID, controlFlow);
+    }
+
+    @Override
+    public ChangePropagationControlFlow removeControlFlow(String controlFlowID) {
+        return this.controlFlows.remove(controlFlowID);
+    }
+
+    @Override
+    public List<ChangePropagationControlFlow> getAllControlFlows() {
+        return List.copyOf(this.controlFlows.values());
+    }
+
+    @Override
+    public Map<String, ChangePropagationControlFlow> getAllIdToControlFlowMappings() {
+        return new LinkedHashMap<>(this.controlFlows);
+    }
+
+    @Override
+    public ChangePropagationControlFlow getControlFlow(String controlFlowID) {
+        return this.controlFlows.get(controlFlowID);
     }
 }
