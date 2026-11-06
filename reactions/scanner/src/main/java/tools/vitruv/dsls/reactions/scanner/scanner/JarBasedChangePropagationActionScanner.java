@@ -7,18 +7,23 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.jar.JarFile;
 
+import tools.vitruv.change.propagation.ChangePropagationSpecification;
+import tools.vitruv.dsls.reactions.runtime.reactions.Reaction;
+import tools.vitruv.dsls.reactions.runtime.routines.Routine;
+import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
+import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacadesProvider;
+
 public class JarBasedChangePropagationActionScanner implements ChangePropagationActionScanner {
     private final static String CLASS_SUFFIX = ".class";
     private final static String INNER_CLASS_SEPARATOR = "$";
 
-    // private ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private Path jarFilePath;
 
-    private Set<Class<?>> cpsClss = new LinkedHashSet<>();
-    private Set<Class<?>> reactionClss = new LinkedHashSet<>();
-    private Set<Class<?>> providerClss = new LinkedHashSet<>();
-    private Set<Class<?>> facadeClss = new LinkedHashSet<>();
-    private Set<Class<?>> routineClss = new LinkedHashSet<>();
+    private Set<Class<? extends ChangePropagationSpecification>> cpsClss = new LinkedHashSet<>();
+    private Set<Class<? extends Reaction>> reactionClss = new LinkedHashSet<>();
+    private Set<Class<? extends RoutinesFacadesProvider>> providerClss = new LinkedHashSet<>();
+    private Set<Class<? extends RoutinesFacade>> facadeClss = new LinkedHashSet<>();
+    private Set<Class<? extends Routine>> routineClss = new LinkedHashSet<>();
 
     public Path getJarFilePath() {
         return this.jarFilePath;
@@ -76,14 +81,40 @@ public class JarBasedChangePropagationActionScanner implements ChangePropagation
         }
     }
 
-    private Class<?> loadClassForName(String clsName) {
-        Class<?> cls;
+    @SuppressWarnings("unchecked")
+    private <T> Class<? extends T> loadClassForName(String clsName) {
+        Class<? extends T> cls;
         try {
             // cls = Class.forName(clsName, false, classLoader);
-            cls = Class.forName(clsName);
+            cls = (Class<? extends T>) Class.forName(clsName);
         } catch (ClassNotFoundException e) {
             throw new IllegalStateException("Could not get the class object for: " + clsName, e);
         }
         return cls;
+    }
+
+    @Override
+    public Set<Class<? extends ChangePropagationSpecification>> getAllCPSClasses() {
+        return this.cpsClss;
+    }
+
+    @Override
+    public Set<Class<? extends Routine>> getAllRoutineClasses() {
+        return this.routineClss;
+    }
+
+    @Override
+    public Set<Class<? extends Reaction>> getAllReactionClasses() {
+        return this.reactionClss;
+    }
+
+    @Override
+    public Set<Class<? extends RoutinesFacade>> getAllRoutinesFacadeClasses() {
+        return this.facadeClss;
+    }
+
+    @Override
+    public Set<Class<? extends RoutinesFacadesProvider>> getAllRoutinesFacadesProviderClasses() {
+        return this.providerClss;
     }
 }
