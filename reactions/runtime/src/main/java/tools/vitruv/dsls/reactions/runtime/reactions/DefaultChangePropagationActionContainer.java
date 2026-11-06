@@ -8,13 +8,15 @@ import java.util.function.Function;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.dsls.reactions.runtime.controlflows.AbstractReactionsChangePropagationControlFlow;
+import tools.vitruv.dsls.reactions.runtime.controlflows.ChangePropagationControlFlow;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
-public class DefaultChangePropagationActionContainer implements ChangePropagationActionContainer {
-    private Map<String, ChangePropagationControlFlow> controlFlows;
+public class DefaultChangePropagationActionContainer implements ReactionsChangePropagationActionContainer {
+    private Map<String, AbstractReactionsChangePropagationControlFlow> controlFlows;
     private Map<String, Function<ReactionExecutionState, RoutinesFacade>> routineFacadeGenerators;
-    private Map<String, Reaction> reactions;
+    private Map<String, AbstractReaction> reactions;
 
     public DefaultChangePropagationActionContainer() {
         this.controlFlows = new LinkedHashMap<>();
@@ -23,22 +25,22 @@ public class DefaultChangePropagationActionContainer implements ChangePropagatio
     }
 
     @Override
-    public void addReaction(String reactionID, Reaction reaction) {
+    public void addReaction(String reactionID, AbstractReaction reaction) {
         this.reactions.putIfAbsent(reactionID, reaction);
     }
 
     @Override
-    public Reaction overrideExistingReaction(String reactionID, Reaction newReaction) {
+    public AbstractReaction overrideExistingReaction(String reactionID, AbstractReaction newReaction) {
         return this.reactions.put(reactionID, newReaction);
     }
 
     @Override
-    public Reaction removeReaction(String reactionID) {
+    public AbstractReaction removeReaction(String reactionID) {
         return this.reactions.remove(reactionID);
     }
 
     @Override
-    public Reaction getReaction(String reactionID) {
+    public AbstractReaction getReaction(String reactionID) {
         return this.reactions.getOrDefault(reactionID, null);
     }
 
@@ -50,7 +52,7 @@ public class DefaultChangePropagationActionContainer implements ChangePropagatio
     }
 
     @Override
-    public List<Reaction> getAllReactions() {
+    public List<AbstractReaction> getAllReactions() {
         return List.copyOf(reactions.values());
     }
 
@@ -93,7 +95,7 @@ public class DefaultChangePropagationActionContainer implements ChangePropagatio
     }
 
     @Override
-    public Map<String, Reaction> getAllIdToReactionMappings() {
+    public Map<String, AbstractReaction> getAllIdToReactionMappings() {
         return new LinkedHashMap<>(this.reactions);
     }
 
@@ -110,27 +112,27 @@ public class DefaultChangePropagationActionContainer implements ChangePropagatio
     }
 
     @Override
-    public void addControlFlow(String controlFlowID, ChangePropagationControlFlow controlFlow) {
+    public void addControlFlow(String controlFlowID, AbstractReactionsChangePropagationControlFlow controlFlow) {
         this.controlFlows.putIfAbsent(controlFlowID, controlFlow);
     }
 
     @Override
-    public ChangePropagationControlFlow removeControlFlow(String controlFlowID) {
+    public AbstractReactionsChangePropagationControlFlow removeControlFlow(String controlFlowID) {
         return this.controlFlows.remove(controlFlowID);
     }
 
     @Override
-    public List<ChangePropagationControlFlow> getAllControlFlows() {
+    public List<AbstractReactionsChangePropagationControlFlow> getAllControlFlows() {
         return List.copyOf(this.controlFlows.values());
     }
 
     @Override
-    public Map<String, ChangePropagationControlFlow> getAllIdToControlFlowMappings() {
+    public Map<String, AbstractReactionsChangePropagationControlFlow> getAllIdToControlFlowMappings() {
         return new LinkedHashMap<>(this.controlFlows);
     }
 
     @Override
-    public ChangePropagationControlFlow getControlFlow(String controlFlowID) {
+    public AbstractReactionsChangePropagationControlFlow getControlFlow(String controlFlowID) {
         return this.controlFlows.get(controlFlowID);
     }
 }

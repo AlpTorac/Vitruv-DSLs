@@ -6,10 +6,10 @@ import java.util.Map;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 
-import tools.vitruv.dsls.reactions.runtime.reactions.ChangePropagationControlFlow;
+import tools.vitruv.dsls.reactions.runtime.controlflows.AbstractReactionsChangePropagationControlFlow;
 
 public abstract class AbstractReactionsChangePropagationAction extends CallHierarchyHaving
-        implements ChangePropagationAction {
+        implements ReactionsChangePropagationAction {
     private String id;
 
     private final Map<String, Object> paramNameToVal = new LinkedHashMap<>();
@@ -24,9 +24,9 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
     }
 
     @Override
-    public ChangePropagationControlFlow getCallingControlFlow() {
-        ChangePropagationControlFlow oldestControlFlow = null;
-        if (this instanceof ChangePropagationControlFlow _this) {
+    public AbstractReactionsChangePropagationControlFlow getCallingControlFlow() {
+        AbstractReactionsChangePropagationControlFlow oldestControlFlow = null;
+        if (this instanceof AbstractReactionsChangePropagationControlFlow _this) {
             oldestControlFlow = _this;
         }
 
@@ -35,7 +35,7 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
         // Assume that there are no cycles in the CallHierarchyHaving tree
         while (oldestCalledBy != null) {
             oldestCalledBy = oldestCalledBy.getCalledBy();
-            if (oldestCalledBy instanceof ChangePropagationControlFlow cpa) {
+            if (oldestCalledBy instanceof AbstractReactionsChangePropagationControlFlow cpa) {
                 oldestControlFlow = cpa;
             }
         }
@@ -75,7 +75,7 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
             return val != null ? (T) val : null;
         }
 
-        if (this.getCalledBy() instanceof ChangePropagationAction castedCaller)
+        if (this.getCalledBy() instanceof ReactionsChangePropagationAction castedCaller)
             return castedCaller.getParam(paramName);
 
         return null;

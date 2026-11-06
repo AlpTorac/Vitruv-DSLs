@@ -21,6 +21,7 @@ import tools.vitruv.change.interaction.UserInteractor;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.change.propagation.impl.AbstractChangePropagationSpecification;
 import tools.vitruv.change.utils.ResourceAccess;
+import tools.vitruv.dsls.reactions.runtime.controlflows.DefaultReactionsChangePropagationControlFlow;
 import tools.vitruv.dsls.reactions.runtime.correspondence.CorrespondenceFactory;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
@@ -35,7 +36,7 @@ public abstract class AbstractReactionsChangePropagationSpecification
       AbstractReactionsChangePropagationSpecification.class);
 
   private String rootControlFlowID;
-  private ChangePropagationActionContainer con;
+  private ReactionsChangePropagationActionContainer con;
 
   /**
    * Creates an {@link AbstractReactionsChangePropagationSpecification} without reactions 
@@ -59,7 +60,7 @@ public abstract class AbstractReactionsChangePropagationSpecification
     if (rootControlFlowID != null) {
       this.rootControlFlowID = rootControlFlowID;
     } else {
-      var defaultControlFlow = new DefaultChangePropagationControlFlow();
+      var defaultControlFlow = new DefaultReactionsChangePropagationControlFlow();
       this.rootControlFlowID = defaultControlFlow.getID();
       this.con.addControlFlow(defaultControlFlow);
     }
@@ -74,11 +75,11 @@ public abstract class AbstractReactionsChangePropagationSpecification
     return this.rootControlFlowID;
   }
 
-  public ChangePropagationActionContainer getActionContainer() {
+  public ReactionsChangePropagationActionContainer getActionContainer() {
       return con;
   }
 
-  public void setActionContainer(ChangePropagationActionContainer con) {
+  public void setActionContainer(ReactionsChangePropagationActionContainer con) {
       this.con = con;
   }
 
@@ -103,10 +104,13 @@ public abstract class AbstractReactionsChangePropagationSpecification
   /**
    * Adds reaction to this specification.
    *
+   * Marked as deprecated for backwards compatibility purposes, since generated mir code requires this method
+   * 
    * @param reaction - {@link Reaction}
    */
+  @Deprecated
   protected void addReaction(Reaction reaction) {
-    this.con.addReaction(reaction.getID(), reaction);
+    this.con.addReaction(((AbstractReaction) reaction).getID(), (AbstractReaction) reaction);
   }
 
   /**

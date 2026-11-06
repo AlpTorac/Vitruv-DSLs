@@ -95,11 +95,6 @@ public abstract class AbstractRoutine extends AbstractReactionsChangePropagation
     return success;
   }
 
-  @Override
-  public Object executeAction(EChange<EObject> change, ReactionExecutionState state) {
-    return execute();
-  }
-
   /**
    * Executes the routine and modifies the underlying models. May also persist the modified models.
    *

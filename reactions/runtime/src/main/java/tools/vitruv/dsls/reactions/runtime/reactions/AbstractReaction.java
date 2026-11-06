@@ -58,12 +58,6 @@ public abstract class AbstractReaction extends AbstractReactionsChangePropagatio
     }
   }
 
-  @Override
-  public Object executeAction(EChange<EObject> change, ReactionExecutionState state) {
-      execute(change, state);
-      return true;
-  }
-
   /**
    * Acutally executes this reaction with the appropriate routines, as represented by routineFacade.
    *

@@ -2,18 +2,14 @@ package tools.vitruv.dsls.reactions.runtime.reactions;
 
 public class DefaultReactionsChangePropagationActionContainer extends DefaultChangePropagationActionContainer {
     @Override
-    public void addReaction(String reactionID, Reaction reaction) {
+    public void addReaction(String reactionID, AbstractReaction reaction) {
         super.addReaction(reactionID, reaction);
-        if (reaction instanceof AbstractReaction castedR) {
-            this.setRoutinesFacadesGenerator(reactionID, castedR.getRoutinesFacadeGenerator());
-        }
+        this.setRoutinesFacadesGenerator(reactionID, reaction.getRoutinesFacadeGenerator());
     }
 
     @Override
-    public Reaction overrideExistingReaction(String reactionID, Reaction newReaction) {
-        if (newReaction instanceof AbstractReaction castedR) {
-            this.setRoutinesFacadesGenerator(reactionID, castedR.getRoutinesFacadeGenerator());
-        }
+    public AbstractReaction overrideExistingReaction(String reactionID, AbstractReaction newReaction) {
+        this.setRoutinesFacadesGenerator(reactionID, newReaction.getRoutinesFacadeGenerator());
         return super.overrideExistingReaction(reactionID, newReaction);
     }
 }

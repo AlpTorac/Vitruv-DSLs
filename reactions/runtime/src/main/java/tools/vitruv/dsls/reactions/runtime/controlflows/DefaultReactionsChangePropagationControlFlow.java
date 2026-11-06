@@ -1,18 +1,17 @@
-package tools.vitruv.dsls.reactions.runtime.reactions;
+package tools.vitruv.dsls.reactions.runtime.controlflows;
 
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
-public class DefaultChangePropagationControlFlow extends AbstractChangePropagationControlFlow {
+public class DefaultReactionsChangePropagationControlFlow extends AbstractReactionsChangePropagationControlFlow {
     @Override
     public void propagateChange(EChange<EObject> change, ReactionExecutionState state) {
         var reactions = ((AbstractReactionsChangePropagationSpecification) state.changePropagationObservable())
                 .getActionContainer()
                 .getAllReactions();
-        // Deliberately do not use reactions.forEach(...), so that exceptions are not
-        // sneakily eaten
         for (var reaction : reactions) {
             reaction.execute(change, state);
         }

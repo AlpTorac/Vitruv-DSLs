@@ -17,4 +17,10 @@ public interface Reaction extends ChangePropagationAction {
    * @param executionState - {@link ReactionExecutionState}
    */
   void execute(EChange<EObject> change, ReactionExecutionState executionState);
+
+  @Override
+  default Object executeAction(EChange<EObject> change, ReactionExecutionState state) {
+      execute(change, state);
+      return true;
+  }
 }

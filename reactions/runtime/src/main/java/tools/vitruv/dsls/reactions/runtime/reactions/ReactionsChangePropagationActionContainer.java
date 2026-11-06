@@ -7,10 +7,12 @@ import java.util.function.Function;
 import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
+import tools.vitruv.dsls.reactions.runtime.controlflows.AbstractReactionsChangePropagationControlFlow;
+import tools.vitruv.dsls.reactions.runtime.controlflows.ChangePropagationControlFlow;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
-public interface ChangePropagationActionContainer {
+public interface ReactionsChangePropagationActionContainer {
 	public boolean hasReaction(String reactionID);
 
 	public boolean hasRoutinesFacadesGenerator(String routineID);
@@ -39,24 +41,24 @@ public interface ChangePropagationActionContainer {
 
 	public Map<String, Function<ReactionExecutionState, RoutinesFacade>> getAllIdToRoutinesFacadesGeneratorMappings();
 
-	public default void addReaction(Reaction reaction) {
+	public default void addReaction(AbstractReaction reaction) {
 		this.addReaction(reaction.getID(), reaction);
 	}
 
-	public void addReaction(String reactionID, Reaction reaction);
+	public void addReaction(String reactionID, AbstractReaction reaction);
 
-	public default void addControlFlow(ChangePropagationControlFlow controlFlow) {
+	public default void addControlFlow(AbstractReactionsChangePropagationControlFlow controlFlow) {
 		this.addControlFlow(controlFlow.getID(), controlFlow);
 	}
-	public void addControlFlow(String controlFlowID, ChangePropagationControlFlow controlFlow);
+	public void addControlFlow(String controlFlowID, AbstractReactionsChangePropagationControlFlow controlFlow);
 
-	public Reaction removeReaction(String reactionID);
+	public AbstractReaction removeReaction(String reactionID);
 
-	public default Reaction overrideExistingReaction(Reaction newReaction) {
+	public default AbstractReaction overrideExistingReaction(AbstractReaction newReaction) {
 		return this.overrideExistingReaction(newReaction.getID(), newReaction);
 	}
 
-	public Reaction overrideExistingReaction(String reactionID, Reaction newReaction);
+	public AbstractReaction overrideExistingReaction(String reactionID, AbstractReaction newReaction);
 
 	public Function<ReactionExecutionState, RoutinesFacade> removeRoutinesFacadesGenerator(String facadeID);
 
@@ -64,19 +66,19 @@ public interface ChangePropagationActionContainer {
 
 	public void removeID(String id);
 
-	public Reaction getReaction(String reactionID);
+	public AbstractReaction getReaction(String reactionID);
 	
-	public List<Reaction> getAllReactions();
+	public List<AbstractReaction> getAllReactions();
 	
-	public Map<String, Reaction> getAllIdToReactionMappings();
+	public Map<String, AbstractReaction> getAllIdToReactionMappings();
 	
-	public ChangePropagationControlFlow getControlFlow(String controlFlowID);
-	public List<ChangePropagationControlFlow> getAllControlFlows();
-	public Map<String, ChangePropagationControlFlow> getAllIdToControlFlowMappings();
+	public AbstractReactionsChangePropagationControlFlow getControlFlow(String controlFlowID);
+	public List<AbstractReactionsChangePropagationControlFlow> getAllControlFlows();
+	public Map<String, AbstractReactionsChangePropagationControlFlow> getAllIdToControlFlowMappings();
 
 	public void clear();
 
-	public default void copyTo(ChangePropagationActionContainer otherContainer) {
+	public default void copyTo(ReactionsChangePropagationActionContainer otherContainer) {
 		this.getAllIdToRoutinesFacadesGeneratorMappings()
 				.forEach((id, gen) -> otherContainer.setRoutinesFacadesGenerator(id, gen));
 		this.getAllIdToReactionMappings().forEach((id, reaction) -> otherContainer.addReaction(id, reaction));
