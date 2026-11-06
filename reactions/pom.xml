@@ -19,5 +19,6 @@
     <module>ide</module>
     <module>language</module>
     <module>runtime</module>
+    <module>scanner</module>
   </modules>
 </project>
