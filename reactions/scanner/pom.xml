@@ -11,18 +11,6 @@
   <artifactId>tools.vitruv.dsls.reactions.scanner</artifactId>
   <name>Vitruv Reactions Language Scanner</name>
   <description>Classpath based scanning for Reactions and Routines.</description>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestFile>${project.basedir}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
   <dependencies>
     <!-- Vitruvius compile dependencies -->
     <dependency>
