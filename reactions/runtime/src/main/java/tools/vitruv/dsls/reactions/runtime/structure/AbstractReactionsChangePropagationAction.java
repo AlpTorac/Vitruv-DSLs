@@ -35,8 +35,8 @@ public abstract class AbstractReactionsChangePropagationAction extends CallHiera
         // Assume that there are no cycles in the CallHierarchyHaving tree
         while (oldestCalledBy != null) {
             oldestCalledBy = oldestCalledBy.getCalledBy();
-            if (oldestCalledBy instanceof AbstractReactionsChangePropagationControlFlow cpa) {
-                oldestControlFlow = cpa;
+            if (oldestCalledBy instanceof AbstractReactionsChangePropagationControlFlow newOldestControlFlow) {
+                oldestControlFlow = newOldestControlFlow;
             }
         }
         return oldestControlFlow;

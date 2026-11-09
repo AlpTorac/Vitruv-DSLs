@@ -1,17 +1,10 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
-
-import com.google.common.reflect.ClassPath;
-import com.google.common.reflect.ClassPath.ClassInfo;
 
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.change.composite.MetamodelDescriptor;
@@ -21,10 +14,10 @@ import tools.vitruv.change.interaction.UserInteractor;
 import tools.vitruv.change.propagation.ChangePropagationSpecification;
 import tools.vitruv.change.propagation.impl.AbstractChangePropagationSpecification;
 import tools.vitruv.change.utils.ResourceAccess;
+
 import tools.vitruv.dsls.reactions.runtime.controlflows.DefaultReactionsChangePropagationControlFlow;
 import tools.vitruv.dsls.reactions.runtime.correspondence.CorrespondenceFactory;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
-import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
 /**
@@ -98,13 +91,19 @@ public abstract class AbstractReactionsChangePropagationSpecification
   }
 
   public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Object[] params) {
-    return delegateToRoutine(state, facadeGenID, routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
+    return delegateToRoutine(state, facadeGenID, routineID, params != null ? List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new) : new Class<?>[] {}, params);
+  }
+
+  public Object delegateToControlFlow(EChange<EObject> change, ReactionExecutionState state, String controlFlowID) {
+    var container = getActionContainer();
+    return container.hasControlFlow(controlFlowID) ? container.performControlFlow(change, state, controlFlowID) : null;
   }
 
   /**
    * Adds reaction to this specification.
    *
-   * Marked as deprecated for backwards compatibility purposes, since generated mir code requires this method
+   * Marked as deprecated and kept for backwards compatibility purposes, since generated mir code requires
+   * this method. Use {@code getActionContainer().addReaction(...)} in the future.
    * 
    * @param reaction - {@link Reaction}
    */
@@ -142,7 +141,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
       ResourceAccess resourceAccess) {
     logger.trace("Call relevant reactions from %s to %s", 
         getSourceMetamodelDescriptor(), getTargetMetamodelDescriptor());
-    con.getControlFlow(this.rootControlFlowID).propagateChange(change, getState(correspondenceModel,resourceAccess));
+    var state = getState(correspondenceModel,resourceAccess);
+    con.performControlFlow(change, state, rootControlFlowID);
   }
   
   private static EditableCorrespondenceModelView<ReactionsCorrespondence> getReactionsView(
@@ -156,67 +156,6 @@ public abstract class AbstractReactionsChangePropagationSpecification
     super.setUserInteractor(userInteractor);
     getActionContainer().clear();
     setup();
-  }
-
-  public void registerRoutinesFacades() {
-    /*
-      FIXME: There is currently no way to cleanly register the routines
-      without modifying the code generation. Therefore, use the CPR layout
-      to find out, which routines facade generators directly call which routines.
-      Then register them, in order to allow them to be located during
-      change propagation.
-
-      An alternative to this method, without code generation modifications,
-      is to manually register all routines facade generators within the
-      setup() method.
-    */
-    List<ClassInfo> relevantClasses;
-    try {
-        relevantClasses = ClassPath.from(ClassLoader.getSystemClassLoader())
-                .getAllClasses().stream()
-                .toList();
-    } catch (IOException e) {
-        throw new IllegalStateException(e);
-    }
-
-    // The directory, under which all files related to all generated routines
-    //
-    // Note that this directory may include the routines generated for other
-    // .reactions files too. This way, all possible imports are covered
-    var routinesRootDir = new File("").getAbsoluteFile().toPath().resolve("target").resolve("generated-sources")
-            .resolve("reactions").resolve("mir").resolve("routines");
-
-    for (var routinesDir : routinesRootDir.toFile().listFiles((f) -> f.isDirectory())) {
-        final File routinesFacade = routinesDir.listFiles((f) -> f.getName().endsWith("RoutinesFacade.java"))[0];
-        // Remove the file extension
-        var routinesFacadeClassName = routinesFacade.getName().split("\\.")[0];
-
-        Class<?> routineFacadeCls = relevantClasses.stream()
-                .filter(cls -> cls.getSimpleName().equals(routinesFacadeClassName))
-                .findFirst().orElse(null).load();
-
-        Function<ReactionExecutionState, RoutinesFacade> routinesFacadesGenerator = (state) -> {
-          RoutinesFacade routineFacadeInstance;
-          try {
-              routineFacadeInstance = (RoutinesFacade) routineFacadeCls.getDeclaredConstructors()[0].newInstance(state,
-                      null);
-          } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                  | InvocationTargetException | SecurityException e) {
-              throw new IllegalStateException(e);
-          }
-          return routineFacadeInstance;
-        };
-
-        for (var routineFile : routinesDir.listFiles((f) -> f.getName().endsWith("Routine.java"))) {
-            // Remove the file extension
-            var routineClassName = routineFile.getName().split("\\.")[0];
-
-            // De-capitalise the first letter, in order to comply with the routine call convention
-            var routineNameToRegister = routineClassName.substring(0,1).toLowerCase() + routineClassName.substring(1);
-            this.getActionContainer().setRoutinesFacadesGenerator(routineNameToRegister,
-                    routinesFacadesGenerator);
-        }
-    }
   }
 
   /**

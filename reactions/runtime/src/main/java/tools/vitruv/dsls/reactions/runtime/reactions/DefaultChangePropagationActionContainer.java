@@ -132,7 +132,12 @@ public class DefaultChangePropagationActionContainer implements ReactionsChangeP
     }
 
     @Override
-    public AbstractReactionsChangePropagationControlFlow getControlFlow(String controlFlowID) {
-        return this.controlFlows.get(controlFlowID);
+    public boolean hasControlFlow(String controlFlowID) {
+        return this.controlFlows.containsKey(controlFlowID);
+    }
+
+    @Override
+    public Object performControlFlow(EChange<EObject> change, ReactionExecutionState state, String controlFlowID) {
+        return this.controlFlows.get(controlFlowID).executeAction(change, state);
     }
 }

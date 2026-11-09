@@ -30,7 +30,7 @@ public interface ReactionsChangePropagationActionContainer {
 	public default Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName,
 			Object[] params) {
 		return performRoutine(state, facadeGenID, routineName,
-				List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new),
+				params != null ? List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new) : new Class<?>[] {},
 				params);
 	}
 
@@ -72,7 +72,8 @@ public interface ReactionsChangePropagationActionContainer {
 	
 	public Map<String, AbstractReaction> getAllIdToReactionMappings();
 	
-	public AbstractReactionsChangePropagationControlFlow getControlFlow(String controlFlowID);
+	public boolean hasControlFlow(String controlFlowID);
+	public Object performControlFlow(EChange<EObject> change, ReactionExecutionState state, String controlFlowID);
 	public List<AbstractReactionsChangePropagationControlFlow> getAllControlFlows();
 	public Map<String, AbstractReactionsChangePropagationControlFlow> getAllIdToControlFlowMappings();
 
