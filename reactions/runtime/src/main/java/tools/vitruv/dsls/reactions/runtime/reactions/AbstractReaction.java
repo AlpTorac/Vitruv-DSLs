@@ -35,17 +35,6 @@ public abstract class AbstractReaction extends AbstractReactionsChangePropagatio
       return routinesFacadeGenerator;
   }
 
-  // @Override
-  // protected void deregister() {
-  //   getCallingControlFlow().getActionContainer().removeID(this.getID());
-  // }
-
-  // @Override
-  // protected void register() {
-  //   getCallingControlFlow().getActionContainer().addReaction(this);
-  //   getCallingControlFlow().getActionContainer().setRoutinesFacadesGenerator(this.getID(), routinesFacadeGenerator);
-  // }
-
   @Override
   public void execute(EChange<EObject> change, ReactionExecutionState reactionExecutionState) {
     var cps = (AbstractReactionsChangePropagationSpecification) reactionExecutionState.changePropagationObservable();
