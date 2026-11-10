@@ -154,7 +154,6 @@ public abstract class AbstractReactionsChangePropagationSpecification
   @Override
   public void setUserInteractor(UserInteractor userInteractor) {
     super.setUserInteractor(userInteractor);
-    getActionContainer().clear();
     setup();
   }
 
