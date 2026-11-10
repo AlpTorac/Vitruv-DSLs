@@ -1,7 +1,5 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.ecore.EObject;
@@ -81,17 +79,12 @@ public abstract class AbstractReactionsChangePropagationSpecification
       return container.hasReaction(reactionID) ? container.performReaction(change, state, reactionID) : null;
   }
 
-  public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Class<?>[] paramClss, Object[] params) {
+  public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID) {
       var container = getActionContainer();
       if (container.hasRoutinesFacadesGenerator(facadeGenID)) {
-          return paramClss == null ? container.performRoutine(state, facadeGenID, routineID, params)
-                  : container.performRoutine(state, facadeGenID, routineID, paramClss, params);
+          return container.performRoutine(state, routineID);
       }
       return null;
-  }
-
-  public Object delegateToRoutine(ReactionExecutionState state, String facadeGenID, String routineID, Object[] params) {
-    return delegateToRoutine(state, facadeGenID, routineID, params != null ? List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new) : new Class<?>[] {}, params);
   }
 
   public Object delegateToControlFlow(EChange<EObject> change, ReactionExecutionState state, String controlFlowID) {

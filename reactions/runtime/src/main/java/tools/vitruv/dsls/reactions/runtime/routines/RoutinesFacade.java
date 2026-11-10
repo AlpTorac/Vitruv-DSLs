@@ -1,7 +1,5 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
-import java.util.List;
-
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 

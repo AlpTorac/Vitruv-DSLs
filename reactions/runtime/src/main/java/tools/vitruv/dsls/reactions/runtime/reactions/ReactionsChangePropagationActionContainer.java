@@ -19,20 +19,7 @@ public interface ReactionsChangePropagationActionContainer {
 
 	public Object performReaction(EChange<EObject> change, ReactionExecutionState state, String reactionID);
 
-	public Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName,
-			Class<?>[] paramClss,
-			Object[] params);
-
-	public default Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName) {
-		return performRoutine(state, facadeGenID, routineName, null, null);
-	}
-
-	public default Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineName,
-			Object[] params) {
-		return performRoutine(state, facadeGenID, routineName,
-				params != null ? List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new) : new Class<?>[] {},
-				params);
-	}
+	public Object performRoutine(ReactionExecutionState state, String routineID);
 
 	public void setRoutinesFacadesGenerator(String facadeGenID,
 			Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator);
@@ -50,6 +37,7 @@ public interface ReactionsChangePropagationActionContainer {
 	public default void addControlFlow(AbstractReactionsChangePropagationControlFlow controlFlow) {
 		this.addControlFlow(controlFlow.getID(), controlFlow);
 	}
+
 	public void addControlFlow(String controlFlowID, AbstractReactionsChangePropagationControlFlow controlFlow);
 
 	public AbstractReaction removeReaction(String reactionID);
@@ -67,14 +55,17 @@ public interface ReactionsChangePropagationActionContainer {
 	public void removeID(String id);
 
 	public AbstractReaction getReaction(String reactionID);
-	
+
 	public List<AbstractReaction> getAllReactions();
-	
+
 	public Map<String, AbstractReaction> getAllIdToReactionMappings();
-	
+
 	public boolean hasControlFlow(String controlFlowID);
+
 	public Object performControlFlow(EChange<EObject> change, ReactionExecutionState state, String controlFlowID);
+
 	public List<AbstractReactionsChangePropagationControlFlow> getAllControlFlows();
+
 	public Map<String, AbstractReactionsChangePropagationControlFlow> getAllIdToControlFlowMappings();
 
 	public void clear();

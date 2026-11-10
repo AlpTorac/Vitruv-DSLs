@@ -9,7 +9,7 @@ import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.atomic.EChange;
 import tools.vitruv.dsls.reactions.runtime.controlflows.AbstractReactionsChangePropagationControlFlow;
-import tools.vitruv.dsls.reactions.runtime.controlflows.ChangePropagationControlFlow;
+import tools.vitruv.dsls.reactions.runtime.routines.IDBasedRoutineFacade;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
@@ -73,10 +73,8 @@ public class DefaultChangePropagationActionContainer implements ReactionsChangeP
     }
 
     @Override
-    public Object performRoutine(ReactionExecutionState state, String facadeGenID, String routineID,
-            Class<?>[] paramClss,
-            Object[] params) {
-        return this.routineFacadeGenerators.get(facadeGenID).apply(state).executeRoutine(routineID, paramClss, params);
+    public Object performRoutine(ReactionExecutionState state, String routineID) {
+        return ((IDBasedRoutineFacade) this.routineFacadeGenerators.get(routineID).apply(state)).executeRoutine(routineID);
     }
 
     @Override
