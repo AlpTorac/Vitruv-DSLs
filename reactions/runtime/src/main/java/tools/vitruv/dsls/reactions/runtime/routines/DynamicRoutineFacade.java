@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class DynamicRoutineFacade extends AbstractRoutinesFacade {
+public class DynamicRoutineFacade extends RoutinesFacadeBase {
     private Map<String, Supplier<AbstractRoutine>> ro;
 
     public DynamicRoutineFacade(Map<String, Supplier<AbstractRoutine>> ro) {
@@ -21,7 +21,7 @@ public class DynamicRoutineFacade extends AbstractRoutinesFacade {
         var routineGen = this.ro.get(routineID);
         var routine = routineGen.get();
         routine.setCallHierarchyHaving(this.getCurrentCaller());
-        routine.setRoutinesFacade(this);
+        // routine.setRoutinesFacade(this);
         routine.setExecutionState(getExecutionState());
         System.out.println("Dynamic routine facade directed to: " + routine);
         return routine.execute();

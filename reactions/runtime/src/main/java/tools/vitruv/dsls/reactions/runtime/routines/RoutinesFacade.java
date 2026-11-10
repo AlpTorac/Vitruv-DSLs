@@ -43,23 +43,4 @@ public interface RoutinesFacade {
    * Drops the last caller from the call stack.
    */
   void dropLastCaller();
-
-  /**
-   * Executes the implied Routine
-   */
-  Object executeRoutine(String routineID, Class<?>[] paramClss, Object[] params);
-  /**
-   * Executes the implied Routine, dynamically looks up all params
-   */
-  Object executeRoutine(String routineID, Class<?>[] paramClss);
-  /**
-   * Executes the implied Routine, derives parameter classes from the given parameter array
-   */
-  default Object executeRoutine(String routineID, Object[] params) {
-    return executeRoutine(routineID, List.of(params).stream().map(p -> p.getClass()).toArray(Class[]::new), params);
-  }
-  /**
-   * Executes the implied Routine, asserts that there is only one Routine with a matching ID (i.e. there are no overloading versions of the Routine declared in the .reactions file)
-  */
-  Object executeRoutine(String routineID);
 }
