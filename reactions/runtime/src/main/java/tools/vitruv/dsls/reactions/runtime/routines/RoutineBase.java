@@ -10,27 +10,16 @@ import tools.vitruv.dsls.reactions.runtime.structure.AbstractReactionsChangeProp
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 
 public abstract class RoutineBase extends AbstractReactionsChangePropagationAction implements Routine {
-    private RoutinesFacadeBase routinesFacade;
     private ReactionExecutionState executionState;
 
     public RoutineBase(
-            RoutinesFacadeBase routinesFacade,
             ReactionExecutionState executionState,
             CallHierarchyHaving calledBy) {
         super(calledBy);
-        this.routinesFacade = routinesFacade;
         this.executionState = executionState;
     }
 
     public RoutineBase() {
-    }
-
-    public void setRoutinesFacadeBase(RoutinesFacadeBase routinesFacade) {
-        this.routinesFacade = routinesFacade;
-    }
-
-    public RoutinesFacadeBase getRoutinesFacadeBase() {
-        return this.routinesFacade;
     }
 
     public ReactionExecutionState getExecutionState() {
@@ -47,15 +36,11 @@ public abstract class RoutineBase extends AbstractReactionsChangePropagationActi
 
     @Override
     public boolean execute() {
-        routinesFacade.pushCaller(this);
         var success = false;
-
         try {
             success = executeRoutine();
         } catch (Exception e) {
             throw Exceptions.sneakyThrow(e);
-        } finally {
-            routinesFacade.dropLastCaller();
         }
         return success;
     }

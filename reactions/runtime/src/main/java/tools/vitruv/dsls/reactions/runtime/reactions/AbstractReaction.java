@@ -24,8 +24,14 @@ public abstract class AbstractReaction extends ReactionBase {
   }
 
   @Override
-  protected RoutinesFacade getRoutinesFacade(ReactionExecutionState reactionExecutionState) {
-    return routinesFacadeGenerator.apply(reactionExecutionState);
+  public void execute(EChange<EObject> change, ReactionExecutionState reactionExecutionState) {
+    var routinesFacade = routinesFacadeGenerator.apply(reactionExecutionState);
+    routinesFacade.pushCaller(this);
+    try {
+      executeReaction(change, reactionExecutionState, routinesFacade);
+    } finally {
+      routinesFacade.dropLastCaller();
+    }
   }
 
   /**

@@ -1,5 +1,9 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
+import java.io.IOException;
+
+import org.eclipse.xtext.xbase.lib.Exceptions;
+
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
@@ -9,6 +13,8 @@ import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
  * AbstractRoutine provides a base implementation of a {@link Routine}.
  */
 public abstract class AbstractRoutine extends RoutineBase {
+  private AbstractRoutinesFacade routinesFacade;
+
   /**
    * Creates a new AbstractRoutine.
    *
@@ -20,7 +26,8 @@ public abstract class AbstractRoutine extends RoutineBase {
       AbstractRoutinesFacade routinesFacade,
       ReactionExecutionState executionState,
       CallHierarchyHaving calledBy) {
-    super(routinesFacade, executionState, calledBy);
+    super(executionState, calledBy);
+    this.routinesFacade = routinesFacade;
   }
 
   /**
@@ -33,8 +40,32 @@ public abstract class AbstractRoutine extends RoutineBase {
    */
   @SuppressWarnings("unchecked")
   protected <T extends AbstractRoutinesFacade> T getRoutinesFacade() {
-    return (T) super.getRoutinesFacadeBase();
+    return (T) this.routinesFacade;
   }
+
+  @Override
+  public boolean execute() {
+      routinesFacade.pushCaller(this);
+      var success = false;
+
+      try {
+          success = executeRoutine();
+      } catch (Exception e) {
+          throw Exceptions.sneakyThrow(e);
+      } finally {
+          routinesFacade.dropLastCaller();
+      }
+      return success;
+  }
+
+  /**
+   * Executes the routine and modifies the underlying models. May also persist the
+   * modified models.
+   *
+   * @return true if executing the routine succeeds
+   * @throws IOException should saving the modified models fail
+   */
+  protected abstract boolean executeRoutine() throws IOException;
 
   // Placeholder type so that the generated Routines remain valid
   protected static class CorrespondenceRetriever extends tools.vitruv.dsls.reactions.runtime.routines.CorrespondenceRetriever {
