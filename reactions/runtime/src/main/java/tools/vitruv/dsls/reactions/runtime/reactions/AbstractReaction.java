@@ -7,12 +7,14 @@ import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 
 /**
- * An {@link AbstractReaction} retrieves a routines facade upon each execution and applies the
+ * An {@link AbstractReaction} retrieves a routines facade upon each execution
+ * and applies the
  * current execution's state to that facade such that it gets
  * propagated through all routines and their used facades.
  */
-public abstract class AbstractReaction extends ReactionBase {
+public abstract class AbstractReaction extends ReactionBase implements Cloneable {
   private Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator;
+
   /**
    * Assigns routinesFacadeGenerator to retrieve routine facades from.
    *
@@ -20,7 +22,7 @@ public abstract class AbstractReaction extends ReactionBase {
    */
   protected AbstractReaction(
       Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
-        this.routinesFacadeGenerator = routinesFacadeGenerator;
+    this.routinesFacadeGenerator = routinesFacadeGenerator;
   }
 
   @Override
@@ -35,13 +37,37 @@ public abstract class AbstractReaction extends ReactionBase {
   }
 
   /**
-   * Acutally executes this reaction with the appropriate routines, as represented by routineFacade.
+   * Acutally executes this reaction with the appropriate routines, as represented
+   * by routineFacade.
    *
-   * @param change - {@link EChange}
+   * @param change         - {@link EChange}
    * @param executionState - {@link ReactionExecutionState}
    * @param routinesFacade - {@link RoutinesFacade}
    */
   protected abstract void executeReaction(EChange<EObject> change,
       ReactionExecutionState executionState, RoutinesFacade routinesFacade);
 
+  /**
+   * Creates a clone of this instance. The clone will not share any fields of this
+   * instance, since the clone is meant to represent an independent call to this
+   * Reaction.
+   * 
+   * @see java.lang.Object#clone()
+   */
+  @Override
+  public AbstractReaction clone() {
+    try {
+      return (AbstractReaction) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator() {
+    return routinesFacadeGenerator;
+  }
+
+  public void setRoutinesFacadeGenerator(Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator) {
+    this.routinesFacadeGenerator = routinesFacadeGenerator;
+  }
 }

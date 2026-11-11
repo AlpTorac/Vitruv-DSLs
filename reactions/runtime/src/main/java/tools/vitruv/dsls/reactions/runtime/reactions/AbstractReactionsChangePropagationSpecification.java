@@ -22,7 +22,7 @@ import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 /**
  * A {@link ChangePropagationSpecification} that executes {@link Reaction}s.
  */
-public abstract class AbstractReactionsChangePropagationSpecification 
+public abstract class AbstractReactionsChangePropagationSpecification
     extends AbstractChangePropagationSpecification {
   private static Logger logger = LogManager.getLogger(
       AbstractReactionsChangePropagationSpecification.class);
@@ -31,8 +31,10 @@ public abstract class AbstractReactionsChangePropagationSpecification
   private ReactionsChangePropagationActionContainer con;
 
   /**
-   * Creates an {@link AbstractReactionsChangePropagationSpecification} without reactions 
-   * between the metamodels described by sourceMetamodelDescriptor and targetMetamodelDescriptor.
+   * Creates an {@link AbstractReactionsChangePropagationSpecification} without
+   * reactions
+   * between the metamodels described by sourceMetamodelDescriptor and
+   * targetMetamodelDescriptor.
    *
    * @param sourceMetamodelDescriptor - {@link MetamodelDescriptor}
    * @param targetMetamodelDescriptor - {@link MetamodelDescriptor}
@@ -46,15 +48,16 @@ public abstract class AbstractReactionsChangePropagationSpecification
   public AbstractReactionsChangePropagationSpecification(
       MetamodelDescriptor sourceMetamodelDescriptor,
       MetamodelDescriptor targetMetamodelDescriptor,
-    String rootControlFlowID) {
+      String rootControlFlowID) {
     super(sourceMetamodelDescriptor, targetMetamodelDescriptor);
     this.con = new DefaultReactionsChangePropagationActionContainer();
     if (rootControlFlowID != null) {
       this.rootControlFlowID = rootControlFlowID;
+      // Assume that the root control flow will be added in this.setup()
     } else {
       var cfGen = new ChangePropagationActionGenerator(DefaultControlFlow::new);
       this.rootControlFlowID = ((DefaultControlFlow) cfGen.generateActionInstance()).getID();
-      this.con.addAbsentActionGen(rootControlFlowID, new ChangePropagationActionGenerator(DefaultControlFlow::new));
+      this.con.addAbsentActionGen(this.rootControlFlowID, cfGen);
     }
     this.setup();
   }
@@ -68,47 +71,82 @@ public abstract class AbstractReactionsChangePropagationSpecification
   }
 
   public ReactionsChangePropagationActionContainer getActionContainer() {
-      return con;
+    return con;
   }
 
+  /**
+   * Replaces the current {@link ReactionsChangePropagationActionContainer} with
+   * con, without transfering any existing action generators.
+   */
   public void setActionContainer(ReactionsChangePropagationActionContainer con) {
-      this.con = con;
+    this.con = con;
   }
 
-  public Object delegateToReaction(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state, String reactionID) {
-      var re = this.getActionContainer().getReaction(reactionID);
-      re.setCallHierarchyHaving(caller);
-      return re.executeAction(change, state);
+  /**
+   * Replaces the current {@link ReactionsChangePropagationActionContainer} with
+   * con and transfers all existing action generators from the former
+   * {@link ReactionsChangePropagationActionContainer} to con.
+   */
+  public void continueWithActionContainer(ReactionsChangePropagationActionContainer con, boolean overrideExisting) {
+    if (overrideExisting) {
+      this.con.copyAllTo(con);
+    } else {
+      this.con.copyAbsentTo(con);
+    }
+    setActionContainer(con);
+  }
+
+  /**
+   * Merges the provided {@link ReactionsChangePropagationActionContainer} into
+   * the current one.
+   */
+  public void mergeWithActionContainer(ReactionsChangePropagationActionContainer con, boolean overrideExisting) {
+    if (overrideExisting) {
+      con.copyAllTo(this.con);
+    } else {
+      con.copyAbsentTo(this.con);
+    }
+  }
+
+  public Object delegateToReaction(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state,
+      String reactionID) {
+    var re = this.getActionContainer().getReaction(reactionID);
+    re.setCallHierarchyHaving(caller);
+    return re.executeAction(change, state);
   }
 
   public Object delegateToRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID) {
-      var ro = this.getActionContainer().getRoutine(routineID);
-      ro.setCallHierarchyHaving(caller);
-      return ro.execute();
+    var ro = this.getActionContainer().getRoutine(routineID);
+    ro.setCallHierarchyHaving(caller);
+    return ro.execute();
   }
 
-  public Object delegateToControlFlow(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state, String controlFlowID) {
-      var cf = this.getActionContainer().getControlFlow(controlFlowID);
-      cf.setCallHierarchyHaving(caller);
-      return cf.executeAction(change, state);
+  public Object delegateToControlFlow(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state,
+      String controlFlowID) {
+    var cf = this.getActionContainer().getControlFlow(controlFlowID);
+    cf.setCallHierarchyHaving(caller);
+    return cf.executeAction(change, state);
   }
 
   /**
    * Adds reaction to this specification.
    *
-   * Marked as deprecated and kept for backwards compatibility purposes, since generated mir code requires
+   * Marked as deprecated and kept for backwards compatibility purposes, since
+   * generated mir code requires
    * this method. Use {@code getActionContainer().addReaction(...)} in the future.
    * 
    * @param reaction - {@link Reaction}
    */
   @Deprecated
   protected void addReaction(Reaction reaction) {
-    this.con.addAbsentActionGen(((AbstractReaction) reaction).getID(), new ReactionsChangePropagationActionGenerator((AbstractReaction) reaction));
+    this.con.addAbsentActionGen(((AbstractReaction) reaction).getID(),
+        new ReactionsChangePropagationActionGenerator(() -> ((AbstractReaction) reaction).clone()));
   }
 
   /**
    * {@inheritDoc}
-   * By default, an {@link AbstractReactionsChangePropagationSpecification} handles any change.
+   * By default, an {@link AbstractReactionsChangePropagationSpecification}
+   * handles any change.
    */
   @Override
   public boolean doesHandleChange(EChange<EObject> change,
@@ -116,13 +154,13 @@ public abstract class AbstractReactionsChangePropagationSpecification
     return true;
   }
 
-  protected ReactionExecutionState getState(EditableCorrespondenceModelView<Correspondence> correspondenceModel, 
+  protected ReactionExecutionState getState(EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
     return new ReactionExecutionState(
-          getUserInteractor(),
-          getReactionsView(correspondenceModel),
-          resourceAccess,
-          this);
+        getUserInteractor(),
+        getReactionsView(correspondenceModel),
+        resourceAccess,
+        this);
   }
 
   /**
@@ -130,18 +168,18 @@ public abstract class AbstractReactionsChangePropagationSpecification
    * These modifications happen by executing all reactions this specification has.
    */
   @Override
-  public void propagateChange(EChange<EObject> change, 
-      EditableCorrespondenceModelView<Correspondence> correspondenceModel, 
+  public void propagateChange(EChange<EObject> change,
+      EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
-    logger.trace("Call relevant reactions from %s to %s", 
+    logger.trace("Call relevant reactions from %s to %s",
         getSourceMetamodelDescriptor(), getTargetMetamodelDescriptor());
-    var state = getState(correspondenceModel,resourceAccess);
+    var state = getState(correspondenceModel, resourceAccess);
     delegateToControlFlow(null, change, state, rootControlFlowID);
   }
-  
+
   private static EditableCorrespondenceModelView<ReactionsCorrespondence> getReactionsView(
       EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
-    return correspondenceModel.getEditableView(ReactionsCorrespondence.class, 
+    return correspondenceModel.getEditableView(ReactionsCorrespondence.class,
         CorrespondenceFactory.eINSTANCE::createReactionsCorrespondence);
   }
 

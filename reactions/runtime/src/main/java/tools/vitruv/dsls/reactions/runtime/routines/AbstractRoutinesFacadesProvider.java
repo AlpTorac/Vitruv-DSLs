@@ -7,14 +7,15 @@ import java.util.Map;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
 
-
 /**
  * A RoutinesFacadesProvider which caches created routines facades.
  *
- * <p>Implementations are required to override {@link #createRoutinesFacade(ReactionsImportPath)} 
+ * <p>
+ * Implementations are required to override
+ * {@link #createRoutinesFacade(ReactionsImportPath)}
  * to create the routines facades of the handled import hierarchy there.
  */
-public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacadesProvider {
+public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacadesProvider, Cloneable {
 
   /**
    * Routine facades that were created so far.
@@ -22,7 +23,7 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
   private final Map<ReactionsImportPath, AbstractRoutinesFacade> routinesFacades = new HashMap<>();
 
   private ReactionExecutionState executionState;
-  
+
   /**
    * Creates a new {@link AbstractRoutinesFacadesProvider}.
    *
@@ -32,9 +33,11 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
     this.executionState = executionState;
   }
 
-  public AbstractRoutinesFacadesProvider() {}
+  public ReactionExecutionState getExecutionState() {
+    return executionState;
+  }
 
-  public void setReactionExecutionState(ReactionExecutionState executionState) {
+  public void setExecutionState(ReactionExecutionState executionState) {
     this.executionState = executionState;
   }
 
@@ -66,5 +69,16 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
       return routinesFacade;
     }
     return routinesFacade;
+  }
+
+  /**
+   * Creates a clone of this instance. The clone will not share any fields of this
+   * instance, since the clone is meant to be independent of this instance.
+   * 
+   * @see java.lang.Object#clone()
+   */
+  @Override
+  public AbstractRoutinesFacadesProvider clone() throws CloneNotSupportedException {
+    return (AbstractRoutinesFacadesProvider) super.clone();
   }
 }

@@ -9,17 +9,19 @@ import tools.vitruv.dsls.reactions.runtime.structure.Loggable;
 import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
 
 /**
- * Note: All methods start with an underscore here to not conflict with the methods 
+ * Note: All methods start with an underscore here to not conflict with the
+ * methods
  * that are generated from the routines by concrete implementations.
  */
-public abstract class AbstractRoutinesFacade extends Loggable implements RoutinesFacade {
-  /** 
-   * Used by concrete implementations to request routines facades of executed routines.
+public abstract class AbstractRoutinesFacade extends Loggable implements RoutinesFacade, Cloneable {
+  /**
+   * Used by concrete implementations to request routines facades of executed
+   * routines.
    */
   private RoutinesFacadesProvider routinesFacadesProvider;
   /**
-   * The absolute path inside the import hierarchy to the segment this routines facade belongs to.
-   * Never null.
+   * The absolute path inside the import hierarchy to the segment this routines
+   * facade belongs to. Never null.
    */
   private ReactionsImportPath reactionsImportPath;
   /**
@@ -28,12 +30,11 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
   private ReactionExecutionState executionState;
   private final Deque<CallHierarchyHaving> callerStack = new LinkedList<>();
 
-  
   /**
    * Creates a new {@link AbstractRoutinesFacade}.
    *
    * @param routinesFacadesProvider - {@link RoutinesFacadesProvider}
-   * @param reactionsImportPath - {@link ReactionsImportPath}
+   * @param reactionsImportPath     - {@link ReactionsImportPath}
    */
   protected AbstractRoutinesFacade(
       RoutinesFacadesProvider routinesFacadesProvider, ReactionsImportPath reactionsImportPath) {
@@ -59,28 +60,47 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
     return reactionsImportPath;
   }
 
+  public void setRoutinesFacadesProvider(RoutinesFacadesProvider routinesFacadesProvider) {
+    this.routinesFacadesProvider = routinesFacadesProvider;
+  }
+
+  public void setReactionsImportPath(ReactionsImportPath reactionsImportPath) {
+    this.reactionsImportPath = reactionsImportPath;
+  }
+
   @Override
   public void setExecutionState(ReactionExecutionState executionState) {
     this.executionState = executionState;
   }
-  
+
   @Override
   public ReactionExecutionState getExecutionState() {
     return executionState;
   }
-  
+
   @Override
   public void pushCaller(CallHierarchyHaving caller) {
     callerStack.push(caller);
   }
-  
+
   @Override
   public CallHierarchyHaving getCurrentCaller() {
     return (!callerStack.isEmpty()) ? callerStack.peek() : null;
   }
-  
+
   @Override
   public void dropLastCaller() {
     callerStack.pop();
+  }
+
+  /**
+   * Creates a clone of this instance. The clone will not share any fields of this
+   * instance, since the clone is meant to be independent of this instance.
+   * 
+   * @see java.lang.Object#clone()
+   */
+  @Override
+  public AbstractRoutinesFacade clone() throws CloneNotSupportedException {
+    return (AbstractRoutinesFacade) super.clone();
   }
 }

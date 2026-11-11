@@ -12,7 +12,7 @@ import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 /**
  * AbstractRoutine provides a base implementation of a {@link Routine}.
  */
-public abstract class AbstractRoutine extends RoutineBase {
+public abstract class AbstractRoutine extends RoutineBase implements Cloneable {
   private AbstractRoutinesFacade routinesFacade;
 
   /**
@@ -39,23 +39,27 @@ public abstract class AbstractRoutine extends RoutineBase {
    * @return <code>routinesFacade</code>
    */
   @SuppressWarnings("unchecked")
-  protected <T extends AbstractRoutinesFacade> T getRoutinesFacade() {
+  public <T extends AbstractRoutinesFacade> T getRoutinesFacade() {
     return (T) this.routinesFacade;
+  }
+
+  public void setRoutinesFacade(AbstractRoutinesFacade newFacade) {
+    this.routinesFacade = newFacade;
   }
 
   @Override
   public boolean execute() {
-      routinesFacade.pushCaller(this);
-      var success = false;
+    routinesFacade.pushCaller(this);
+    var success = false;
 
-      try {
-          success = executeRoutine();
-      } catch (Exception e) {
-          throw Exceptions.sneakyThrow(e);
-      } finally {
-          routinesFacade.dropLastCaller();
-      }
-      return success;
+    try {
+      success = executeRoutine();
+    } catch (Exception e) {
+      throw Exceptions.sneakyThrow(e);
+    } finally {
+      routinesFacade.dropLastCaller();
+    }
+    return success;
   }
 
   /**
@@ -67,8 +71,21 @@ public abstract class AbstractRoutine extends RoutineBase {
    */
   protected abstract boolean executeRoutine() throws IOException;
 
+  /**
+   * Creates a clone of this instance. The clone will not share any fields of this
+   * instance, since the clone is meant to represent an independent call to this
+   * Routine.
+   * 
+   * @see java.lang.Object#clone()
+   */
+  @Override
+  protected Object clone() throws CloneNotSupportedException {
+    return super.clone();
+  }
+
   // Placeholder type so that the generated Routines remain valid
-  protected static class CorrespondenceRetriever extends tools.vitruv.dsls.reactions.runtime.routines.CorrespondenceRetriever {
+  protected static class CorrespondenceRetriever
+      extends tools.vitruv.dsls.reactions.runtime.routines.CorrespondenceRetriever {
     protected CorrespondenceRetriever(EditableCorrespondenceModelView<ReactionsCorrespondence> correspondenceModel) {
       super(correspondenceModel);
     }
