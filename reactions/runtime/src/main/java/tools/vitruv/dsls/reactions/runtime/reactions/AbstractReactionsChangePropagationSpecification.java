@@ -82,32 +82,6 @@ public abstract class AbstractReactionsChangePropagationSpecification
     this.con = con;
   }
 
-  /**
-   * Replaces the current {@link ReactionsChangePropagationActionContainer} with
-   * con and transfers all existing action generators from the former
-   * {@link ReactionsChangePropagationActionContainer} to con.
-   */
-  public void continueWithActionContainer(ReactionsChangePropagationActionContainer con, boolean overrideExisting) {
-    if (overrideExisting) {
-      this.con.copyAllTo(con);
-    } else {
-      this.con.copyAbsentTo(con);
-    }
-    setActionContainer(con);
-  }
-
-  /**
-   * Merges the provided {@link ReactionsChangePropagationActionContainer} into
-   * the current one.
-   */
-  public void mergeWithActionContainer(ReactionsChangePropagationActionContainer con, boolean overrideExisting) {
-    if (overrideExisting) {
-      con.copyAllTo(this.con);
-    } else {
-      con.copyAbsentTo(this.con);
-    }
-  }
-
   public Object delegateToReaction(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state,
       String reactionID) {
     var re = this.getActionContainer().getReaction(reactionID);
