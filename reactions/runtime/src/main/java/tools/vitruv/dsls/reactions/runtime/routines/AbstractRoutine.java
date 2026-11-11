@@ -31,6 +31,13 @@ public abstract class AbstractRoutine extends RoutineBase implements Cloneable {
   }
 
   /**
+   * A default constructor that builds an empty instance. Meant to be used for
+   * wrapping the concrete, generated Routines.
+   */
+  protected AbstractRoutine() {
+  }
+
+  /**
    * Casts the routine facade to type T.
    *
    * @param <T> - generic return type for convenience.
