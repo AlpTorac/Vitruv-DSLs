@@ -156,9 +156,12 @@ public abstract class AbstractReactionsChangePropagationSpecification
 
   protected ReactionExecutionState getState(EditableCorrespondenceModelView<Correspondence> correspondenceModel,
       ResourceAccess resourceAccess) {
+    EditableCorrespondenceModelView<ReactionsCorrespondence> view = null;
+    if (correspondenceModel != null)
+      view = getReactionsView(correspondenceModel);
     return new ReactionExecutionState(
         getUserInteractor(),
-        getReactionsView(correspondenceModel),
+        view,
         resourceAccess,
         this);
   }
