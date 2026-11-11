@@ -6,10 +6,10 @@ import org.eclipse.xtext.xbase.lib.Exceptions;
 
 import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
-import tools.vitruv.dsls.reactions.runtime.structure.AbstractReactionsChangePropagationAction;
+import tools.vitruv.dsls.reactions.runtime.structure.AbstractChangePropagationAction;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 
-public abstract class RoutineBase extends AbstractReactionsChangePropagationAction implements Routine {
+public abstract class RoutineBase extends AbstractChangePropagationAction implements Routine {
     private ReactionExecutionState executionState;
 
     public RoutineBase(

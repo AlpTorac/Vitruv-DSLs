@@ -41,30 +41,25 @@ public abstract class PureJavaReaction extends ReactionBase {
         if (!performWithBlock())
             return;
 
-        getCallBlock().updateModels();
+        getCallBlock(executionState).updateModels(this);
     }
 
-    protected abstract PureJavaCall getCallBlock();
+    protected abstract PureJavaCall getCallBlock(ReactionExecutionState executionState);
 
     /**
      * Matches the structure of the currently generated "call" blocks
      */
     protected static abstract class PureJavaCall extends Update {
-        private ReactionBase containingReaction;
-
-        public PureJavaCall(ReactionBase containingReaction, ReactionExecutionState executionState) {
+        public PureJavaCall(ReactionExecutionState executionState) {
             super(executionState);
-            this.containingReaction = containingReaction;
-        }
-
-        public ReactionBase getContainingReaction() {
-            return this.containingReaction;
         }
 
         /**
-         * Updates the models accordingly, retrieve the necessary parameters from
-         * {@link #getContainingReaction()}
+         * Updates the models accordingly.
+         * 
+         * @param containingReaction The Reaction that contains this Call block, which
+         *                           also has the parameters required by this method
          */
-        public abstract void updateModels();
+        public abstract void updateModels(ReactionBase containingReaction);
     }
 }

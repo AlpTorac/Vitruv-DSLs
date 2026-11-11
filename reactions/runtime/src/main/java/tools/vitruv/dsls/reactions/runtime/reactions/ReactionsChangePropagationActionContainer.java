@@ -1,79 +1,70 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
-import org.eclipse.emf.ecore.EObject;
+import tools.vitruv.dsls.reactions.runtime.controlflows.ControlFlowBase;
+import tools.vitruv.dsls.reactions.runtime.routines.RoutineBase;
+import tools.vitruv.dsls.reactions.runtime.structure.AbstractChangePropagationAction;
 
-import tools.vitruv.change.atomic.EChange;
-import tools.vitruv.dsls.reactions.runtime.controlflows.AbstractReactionsChangePropagationControlFlow;
-import tools.vitruv.dsls.reactions.runtime.controlflows.ChangePropagationControlFlow;
-import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacade;
-import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
-
-public interface ReactionsChangePropagationActionContainer {
-	public boolean hasReaction(String reactionID);
-
-	public boolean hasRoutinesFacadesGenerator(String routineID);
-
-	public Object performReaction(EChange<EObject> change, ReactionExecutionState state, String reactionID);
-
-	public Object performRoutine(ReactionExecutionState state, String routineID);
-
-	public void setRoutinesFacadesGenerator(String facadeGenID,
-			Function<ReactionExecutionState, RoutinesFacade> routinesFacadeGenerator);
-
-	public Function<ReactionExecutionState, RoutinesFacade> getRoutinesFacadeGenerator(String id);
-
-	public Map<String, Function<ReactionExecutionState, RoutinesFacade>> getAllIdToRoutinesFacadesGeneratorMappings();
-
-	public default void addReaction(AbstractReaction reaction) {
-		this.addReaction(reaction.getID(), reaction);
+public interface ReactionsChangePropagationActionContainer extends ChangePropagationActionContainer {
+	public default boolean addAbsentActionGen(String actionIdOverride, AbstractChangePropagationAction action) {
+		return this.addAbsentActionGen(actionIdOverride, new ReactionsChangePropagationActionGenerator(action));
 	}
 
-	public void addReaction(String reactionID, AbstractReaction reaction);
-
-	public default void addControlFlow(AbstractReactionsChangePropagationControlFlow controlFlow) {
-		this.addControlFlow(controlFlow.getID(), controlFlow);
+	public default ChangePropagationActionGenerator overrideActionGen(String actionIdOverride,
+			AbstractChangePropagationAction action) {
+		return this.overrideActionGen(actionIdOverride, new ReactionsChangePropagationActionGenerator(action));
 	}
 
-	public void addControlFlow(String controlFlowID, AbstractReactionsChangePropagationControlFlow controlFlow);
-
-	public AbstractReaction removeReaction(String reactionID);
-
-	public default AbstractReaction overrideExistingReaction(AbstractReaction newReaction) {
-		return this.overrideExistingReaction(newReaction.getID(), newReaction);
+	public default boolean addAbsentActionGen(AbstractChangePropagationAction action) {
+		return this.addAbsentActionGen(action.getID(), new ReactionsChangePropagationActionGenerator(action));
 	}
 
-	public AbstractReaction overrideExistingReaction(String reactionID, AbstractReaction newReaction);
+	public default ChangePropagationActionGenerator overrideActionGen(AbstractChangePropagationAction action) {
+		return this.overrideActionGen(action.getID(), new ReactionsChangePropagationActionGenerator(action));
+	}
 
-	public Function<ReactionExecutionState, RoutinesFacade> removeRoutinesFacadesGenerator(String facadeID);
+	public default boolean addAbsentActionGen(ReactionsChangePropagationActionGenerator actionGen) {
+		return this.addAbsentActionGen(actionGen.getDefaultActionID(), actionGen);
+	}
 
-	public ChangePropagationControlFlow removeControlFlow(String controlFlowID);
+	public default ChangePropagationActionGenerator overrideActionGen(
+			ReactionsChangePropagationActionGenerator actionGen) {
+		return this.overrideActionGen(actionGen.getDefaultActionID(), actionGen);
+	}
 
-	public void removeID(String id);
+	/**
+	 * Note that this method has to return the ReactionBase instances in the
+	 * insertion-order of their action generators. It is important, since the base
+	 * version of Vitruvius always executes Reactions in the order they were added.
+	 * 
+	 * @return All ReactionBases that the added action generators generate, in the
+	 *         order the action generators were inserted
+	 */
+	public default List<ReactionBase> getAllReactions() {
+		return this.getAllIdToGenMap().values().stream().filter(gen -> gen.isOfType(ReactionBase.class))
+				.map(gen -> (ReactionBase) gen.generateActionInstance()).toList();
+	}
 
-	public AbstractReaction getReaction(String reactionID);
+	public default List<RoutineBase> getAllRoutines() {
+		return this.getAllIdToGenMap().values().stream().filter(gen -> gen.isOfType(RoutineBase.class))
+				.map(gen -> (RoutineBase) gen.generateActionInstance()).toList();
+	}
 
-	public List<AbstractReaction> getAllReactions();
+	public default List<ControlFlowBase> getAllControlFlows() {
+		return this.getAllIdToGenMap().values().stream().filter(gen -> gen.isOfType(ControlFlowBase.class))
+				.map(gen -> (ControlFlowBase) gen.generateActionInstance()).toList();
+	}
 
-	public Map<String, AbstractReaction> getAllIdToReactionMappings();
+	public default ReactionBase getReaction(String reactionID) {
+		return (ReactionBase) getAction(reactionID);
+	}
 
-	public boolean hasControlFlow(String controlFlowID);
+	public default RoutineBase getRoutine(String routineID) {
+		return (RoutineBase) getAction(routineID);
+	}
 
-	public Object performControlFlow(EChange<EObject> change, ReactionExecutionState state, String controlFlowID);
-
-	public List<AbstractReactionsChangePropagationControlFlow> getAllControlFlows();
-
-	public Map<String, AbstractReactionsChangePropagationControlFlow> getAllIdToControlFlowMappings();
-
-	public void clear();
-
-	public default void copyTo(ReactionsChangePropagationActionContainer otherContainer) {
-		this.getAllIdToRoutinesFacadesGeneratorMappings()
-				.forEach((id, gen) -> otherContainer.setRoutinesFacadesGenerator(id, gen));
-		this.getAllIdToReactionMappings().forEach((id, reaction) -> otherContainer.addReaction(id, reaction));
-		this.getAllIdToControlFlowMappings().forEach((id, cf) -> otherContainer.addControlFlow(id, cf));
+	public default ControlFlowBase getControlFlow(String controlFlowID) {
+		return (ControlFlowBase) getAction(controlFlowID);
 	}
 }

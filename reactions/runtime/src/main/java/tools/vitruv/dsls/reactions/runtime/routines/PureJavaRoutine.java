@@ -61,14 +61,6 @@ public abstract class PureJavaRoutine extends RoutineBase {
             this.containingRoutine = containingRoutine;
         }
 
-        @SuppressWarnings("unchecked")
-        public <T> T getParam(String paramName) {
-            var paramVal = containingRoutine.getParam(paramName);
-            if (paramVal == null)
-                return null;
-            return (T) paramVal;
-        }
-
         public RoutineBase getContainingRoutine() {
             return this.containingRoutine;
         }
