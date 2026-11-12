@@ -149,7 +149,8 @@ public class Update extends CorrespondenceRetriever {
      */
 
     /**
-     * @return The {@link AbstractReactionsChangePropagationSpecification} from the executionState.
+     * @return The {@link AbstractReactionsChangePropagationSpecification} from the
+     *         executionState.
      */
     protected AbstractReactionsChangePropagationSpecification getCPS() {
         return ((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
@@ -159,19 +160,47 @@ public class Update extends CorrespondenceRetriever {
      * Delegates to the pure Java Routine that is registered under the given ID.
      * 
      * @param facade The facade of the Routine / Reaction that contains this block
-     * @param params The parameters of the delegated Routine (except the facade, caller, state)
+     * @param params The parameters of the delegated Routine (except the facade,
+     *               caller, state)
      */
     protected Object delegateToJavaRoutine(AbstractRoutinesFacade facade, String routineID, List<Object> params) {
         return getCPS().delegateToJavaRoutine(facade.getCurrentCaller(), executionState, routineID, params);
     }
 
     /**
-     * Delegates to the Reactions language Routine that is registered under the given ID.
+     * Delegates to the pure Java Routine that is registered under the given ID.
      * 
      * @param facade The facade of the Routine / Reaction that contains this block
-     * @param params The parameters of the delegated Routine (except the facade, caller, state)
+     * @param params The parameters of the delegated Routine (except the facade,
+     *               caller, state)
+     */
+    protected Object delegateToJavaRoutine(AbstractRoutinesFacade facade, String routineID, Object... params) {
+        List<Object> paramList = params != null ? List.of(params) : List.of();
+        return delegateToJavaRoutine(facade, routineID, paramList);
+    }
+
+    /**
+     * Delegates to the Reactions language Routine that is registered under the
+     * given ID.
+     * 
+     * @param facade The facade of the Routine / Reaction that contains this block
+     * @param params The parameters of the delegated Routine (except the facade,
+     *               caller, state)
      */
     protected Object delegateToReactionsRoutine(AbstractRoutinesFacade facade, String routineID, List<Object> params) {
         return getCPS().delegateToReactionsRoutine(facade, routineID, params);
+    }
+
+    /**
+     * Delegates to the Reactions language Routine that is registered under the
+     * given ID.
+     * 
+     * @param facade The facade of the Routine / Reaction that contains this block
+     * @param params The parameters of the delegated Routine (except the facade,
+     *               caller, state)
+     */
+    protected Object delegateToReactionsRoutine(AbstractRoutinesFacade facade, String routineID, Object... params) {
+        List<Object> paramList = params != null ? List.of(params) : List.of();
+        return delegateToReactionsRoutine(facade, routineID, paramList);
     }
 }
