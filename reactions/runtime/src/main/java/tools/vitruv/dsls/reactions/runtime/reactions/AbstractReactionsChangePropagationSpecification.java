@@ -19,6 +19,7 @@ import tools.vitruv.change.utils.ResourceAccess;
 import tools.vitruv.dsls.reactions.runtime.controlflows.DefaultControlFlow;
 import tools.vitruv.dsls.reactions.runtime.correspondence.CorrespondenceFactory;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
+import tools.vitruv.dsls.reactions.runtime.routines.AbstractRoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.routines.ReactionsRoutineWrapper;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutineBase;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
@@ -102,19 +103,27 @@ public abstract class AbstractReactionsChangePropagationSpecification
     return (ReactionsRoutineWrapper) this.getActionContainer().getRoutine(routineID);
   }
 
-  public Object delegateToRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID, Map<String, Object> paramNameToVal) {
-    var ro = this.getActionContainer().getRoutine(routineID);
-    ro.setCallHierarchyHaving(caller);
-    ro.setExecutionState(state);
-    ro.putAllParams(paramNameToVal);
-    return ro.execute();
-  }
+  // public Object delegateToRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID, Map<String, Object> paramNameToVal) {
+  //   var ro = this.getActionContainer().getRoutine(routineID);
+  //   ro.setCallHierarchyHaving(caller);
+  //   ro.setExecutionState(state);
+  //   ro.putAllParams(paramNameToVal);
+  //   return ro.execute();
+  // }
 
-  public Object delegateToRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID, List<Object> paramVals) {
+  public Object delegateToJavaRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID, List<Object> paramVals) {
     var ro = this.getActionContainer().getRoutine(routineID);
     ro.setCallHierarchyHaving(caller);
     ro.setExecutionState(state);
     ro.putAllUnnamedParams(paramVals);
+    return ro.execute();
+  }
+
+  public Object delegateToReactionsRoutine(AbstractRoutinesFacade roFac, String routineID, List<Object> paramVals) {
+    var ro = this.getRoutineWrapper(routineID);
+    ro.setCallerRoutinesFacade(roFac);
+    ro.putAllUnnamedParams(paramVals);
+    ro.init();
     return ro.execute();
   }
 

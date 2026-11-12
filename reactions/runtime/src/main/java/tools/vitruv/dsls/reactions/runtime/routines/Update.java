@@ -1,5 +1,7 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
+import java.util.List;
+
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -36,10 +38,6 @@ public class Update extends CorrespondenceRetriever {
     protected Update(ReactionExecutionState executionState) {
         super(executionState.getCorrespondenceModel());
         this.executionState = executionState;
-    }
-
-    public AbstractReactionsChangePropagationSpecification getCPS() {
-        return this.getCPS(executionState);
     }
 
     /**
@@ -142,5 +140,38 @@ public class Update extends CorrespondenceRetriever {
         executionState
                 .getCorrespondenceModel()
                 .removeCorrespondencesBetween(firstElement, secondElement, tag);
+    }
+
+    /*
+     * The methods below this comment are only for convenience and less verbosity in
+     * CPR implementation. They have do not add any new capabilities to the update
+     * blocks.
+     */
+
+    /**
+     * @return The {@link AbstractReactionsChangePropagationSpecification} from the executionState.
+     */
+    protected AbstractReactionsChangePropagationSpecification getCPS() {
+        return ((AbstractReactionsChangePropagationSpecification) executionState.changePropagationObservable());
+    }
+
+    /**
+     * Delegates to the pure Java Routine that is registered under the given ID.
+     * 
+     * @param facade The facade of the Routine / Reaction that contains this block
+     * @param params The parameters of the delegated Routine (except the facade, caller, state)
+     */
+    protected Object delegateToJavaRoutine(AbstractRoutinesFacade facade, String routineID, List<Object> params) {
+        return getCPS().delegateToJavaRoutine(facade.getCurrentCaller(), executionState, routineID, params);
+    }
+
+    /**
+     * Delegates to the Reactions language Routine that is registered under the given ID.
+     * 
+     * @param facade The facade of the Routine / Reaction that contains this block
+     * @param params The parameters of the delegated Routine (except the facade, caller, state)
+     */
+    protected Object delegateToReactionsRoutine(AbstractRoutinesFacade facade, String routineID, List<Object> params) {
+        return getCPS().delegateToReactionsRoutine(facade, routineID, params);
     }
 }

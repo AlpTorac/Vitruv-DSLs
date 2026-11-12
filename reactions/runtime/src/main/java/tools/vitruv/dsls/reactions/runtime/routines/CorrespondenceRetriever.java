@@ -9,8 +9,6 @@ import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
-import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
-import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.Loggable;
 
 /**
@@ -29,10 +27,6 @@ public class CorrespondenceRetriever extends Loggable {
     protected CorrespondenceRetriever(
             EditableCorrespondenceModelView<ReactionsCorrespondence> correspondenceModel) {
         this.correspondenceModel = correspondenceModel;
-    }
-
-    public AbstractReactionsChangePropagationSpecification getCPS(ReactionExecutionState state) {
-        return ((AbstractReactionsChangePropagationSpecification) state.changePropagationObservable());
     }
 
     /**
