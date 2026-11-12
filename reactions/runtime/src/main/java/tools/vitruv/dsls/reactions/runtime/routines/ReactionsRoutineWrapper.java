@@ -16,11 +16,26 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     private AbstractRoutinesFacade callerRoutinesFacade;
     private UnnamedParamIt unnamedParamIt;
 
+    /**
+     * Builds a direct RoutinesFacadesProvider for the Routine to be wrapped:
+     * 
+     * If the Routine is called "SomeRoutine", then it builds
+     * "SomeRoutinesFacadesProvider".
+     */
     private Function<ReactionExecutionState, RoutinesFacadesProvider> roFacProvFunc;
+    /**
+     * Builds a direct RoutinesFacade for the Routine to be wrapped:
+     * 
+     * If the Routine is called "SomeRoutine", then it builds "SomeRoutinesFacade".
+     */
     private BiFunction<RoutinesFacadesProvider, ReactionsImportPath, RoutinesFacade> roFacFunc;
+    /**
+     * Builds a Routine by using its constructor.
+     */
     private Supplier<Routine> roFunc;
 
-    public ReactionsRoutineWrapper() {}
+    public ReactionsRoutineWrapper() {
+    }
 
     public RoutinesFacade getCallerRoutinesFacade() {
         return this.callerRoutinesFacade;
@@ -47,7 +62,16 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     @SuppressWarnings("unchecked")
     protected <T extends RoutinesFacade> T getFacade() {
         var prov = getProvider();
-        return (T) roFacFunc.apply(prov, getImportPath(prov));
+        var facade = (T) roFacFunc.apply(prov, getImportPath(prov));
+
+        /*
+         * Normally the RoutinesFacadesProvider sets the state of the RoutinesFacade.
+         * However, since the RoutinesFacade function is also configurable, manually set
+         * the state of the generated RoutinesFacade, in order to make sure that it is
+         * set.
+         */
+        facade.setExecutionState(getExecutionState());
+        return facade;
     }
 
     protected ReactionsImportPath getImportPath(RoutinesFacadesProvider provider) {
@@ -64,8 +88,16 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
         return roFacProvFunc;
     }
 
+    /**
+     * Sets how the direct RoutinesFacadesProvider of the wrapped Routine is built.
+     * Also sets how the direct RoutinesFacade of the wrapped Routine is built, if
+     * it has not been set yet.
+     */
     public void setProviderFunc(Function<ReactionExecutionState, RoutinesFacadesProvider> roFacProvFunc) {
         this.roFacProvFunc = roFacProvFunc;
+        if (this.roFacFunc == null) {
+            this.roFacFunc = (prov, imp) -> prov.getRoutinesFacade(imp);
+        }
     }
 
     public BiFunction<RoutinesFacadesProvider, ReactionsImportPath, RoutinesFacade> getFacadeFunc() {
