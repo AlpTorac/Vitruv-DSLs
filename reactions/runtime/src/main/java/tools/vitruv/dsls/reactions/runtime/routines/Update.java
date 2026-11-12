@@ -215,4 +215,8 @@ public class Update extends CorrespondenceRetriever {
     protected <T> T getParam(AbstractRoutinesFacade facade, String paramName) {
         return this.getCurrentRoutine(facade).getParam(paramName);
     }
+
+    protected void putParam(AbstractRoutinesFacade facade, String paramName, Object paramVal) {
+        this.getCurrentRoutine(facade).putParam(paramName, paramVal);
+    }
 }
