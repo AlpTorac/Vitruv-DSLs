@@ -1,7 +1,6 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
 import java.util.List;
-import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +20,7 @@ import tools.vitruv.dsls.reactions.runtime.correspondence.CorrespondenceFactory;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
 import tools.vitruv.dsls.reactions.runtime.routines.AbstractRoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.routines.ReactionsRoutineWrapper;
-import tools.vitruv.dsls.reactions.runtime.routines.RoutineBase;
+import tools.vitruv.dsls.reactions.runtime.routines.Routine;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 
@@ -95,7 +94,7 @@ public abstract class AbstractReactionsChangePropagationSpecification
     return re.executeAction(change, state);
   }
 
-  public RoutineBase getRoutine(String routineID) {
+  public Routine getRoutine(String routineID) {
     return this.getActionContainer().getRoutine(routineID);
   }
 
@@ -103,15 +102,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
     return (ReactionsRoutineWrapper) this.getActionContainer().getRoutine(routineID);
   }
 
-  // public Object delegateToRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID, Map<String, Object> paramNameToVal) {
-  //   var ro = this.getActionContainer().getRoutine(routineID);
-  //   ro.setCallHierarchyHaving(caller);
-  //   ro.setExecutionState(state);
-  //   ro.putAllParams(paramNameToVal);
-  //   return ro.execute();
-  // }
-
-  public Object delegateToJavaRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID, List<Object> paramVals) {
+  public Object delegateToJavaRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID,
+      List<Object> paramVals) {
     var ro = this.getActionContainer().getRoutine(routineID);
     ro.setCallHierarchyHaving(caller);
     ro.setExecutionState(state);
@@ -158,6 +150,10 @@ public abstract class AbstractReactionsChangePropagationSpecification
   public boolean doesHandleChange(EChange<EObject> change,
       EditableCorrespondenceModelView<Correspondence> correspondenceModel) {
     return true;
+  }
+
+  public ReactionExecutionState getState() {
+    return new ReactionExecutionState(getUserInteractor(), null, null, this);
   }
 
   protected ReactionExecutionState getState(EditableCorrespondenceModelView<Correspondence> correspondenceModel,
