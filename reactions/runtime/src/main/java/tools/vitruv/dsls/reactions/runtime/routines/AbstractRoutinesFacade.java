@@ -13,7 +13,9 @@ import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
  * methods
  * that are generated from the routines by concrete implementations.
  */
-public abstract class AbstractRoutinesFacade extends Loggable implements RoutinesFacade, Cloneable {
+public abstract class AbstractRoutinesFacade extends Loggable implements RoutinesFacade
+// ,Cloneable
+{
   /**
    * Used by concrete implementations to request routines facades of executed
    * routines.
@@ -93,14 +95,26 @@ public abstract class AbstractRoutinesFacade extends Loggable implements Routine
     callerStack.pop();
   }
 
-  /**
-   * Creates a clone of this instance. The clone will not share any fields of this
-   * instance, since the clone is meant to be independent of this instance.
-   * 
-   * @see java.lang.Object#clone()
-   */
-  @Override
-  public AbstractRoutinesFacade clone() throws CloneNotSupportedException {
-    return (AbstractRoutinesFacade) super.clone();
-  }
+  // /**
+  //  * Creates a clone of this instance
+  //  * 
+  //  * @see java.lang.Object#clone()
+  //  */
+  // @Override
+  // public AbstractRoutinesFacade clone() {
+  //   try {
+  //     var clone = (AbstractRoutinesFacade) super.clone();
+  //     clone.executionState = new ReactionExecutionState(executionState.userInteractor(),
+  //         executionState.getCorrespondenceModel(), executionState.getResourceAccess(),
+  //         executionState.changePropagationObservable());
+  //     clone.callerStack = new LinkedList<>(callerStack);
+  //     clone.reactionsImportPath = reactionsImportPath;
+  //     if (routinesFacadesProvider instanceof AbstractRoutinesFacadesProvider castedProv) {
+  //       clone.routinesFacadesProvider = castedProv.clone();
+  //     }
+  //     return clone;
+  //   } catch (CloneNotSupportedException e) {
+  //     throw new UnsupportedOperationException(e);
+  //   }
+  // }
 }

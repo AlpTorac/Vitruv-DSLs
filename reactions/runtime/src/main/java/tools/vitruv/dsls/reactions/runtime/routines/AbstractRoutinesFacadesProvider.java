@@ -15,7 +15,9 @@ import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
  * {@link #createRoutinesFacade(ReactionsImportPath)}
  * to create the routines facades of the handled import hierarchy there.
  */
-public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacadesProvider, Cloneable {
+public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacadesProvider
+// , Cloneable
+{
 
   /**
    * Routine facades that were created so far.
@@ -71,14 +73,25 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
     return routinesFacade;
   }
 
-  /**
-   * Creates a clone of this instance. The clone will not share any fields of this
-   * instance, since the clone is meant to be independent of this instance.
-   * 
-   * @see java.lang.Object#clone()
-   */
-  @Override
-  public AbstractRoutinesFacadesProvider clone() throws CloneNotSupportedException {
-    return (AbstractRoutinesFacadesProvider) super.clone();
-  }
+  // /**
+  //  * Creates a clone of this instance
+  //  * 
+  //  * @see java.lang.Object#clone()
+  //  */
+  // @Override
+  // public AbstractRoutinesFacadesProvider clone() {
+  //   try {
+  //     var clone = (AbstractRoutinesFacadesProvider) super.clone();
+  //     if (executionState != null) {
+  //       clone.executionState = new ReactionExecutionState(executionState.userInteractor(),
+  //           executionState.getCorrespondenceModel(), executionState.getResourceAccess(),
+  //           executionState.changePropagationObservable());
+  //     }
+  //     // Do not clone the routinesFacades, in order to avoid provider field inconsistencies
+  //     clone.routinesFacades = new HashMap<>();
+  //     return clone;
+  //   } catch (CloneNotSupportedException e) {
+  //     throw new UnsupportedOperationException(e);
+  //   }
+  // }
 }
