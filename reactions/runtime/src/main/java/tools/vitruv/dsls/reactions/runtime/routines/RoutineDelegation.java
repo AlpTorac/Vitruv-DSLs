@@ -163,28 +163,16 @@ public class RoutineDelegation {
     }
 
     protected void setupRoutine(Routine ro) {
-        if (ro instanceof ReactionsRoutineWrapper wrapperRo) {
-            setupWrapperRoutine(wrapperRo);
-        } else if (ro instanceof RoutineBase castedRo) {
-            setupRoutineBase(castedRo);
+        if (ro instanceof RoutineBase castedRo) {
+            if (ro instanceof ReactionsRoutineWrapper wrapperRo && this.facade instanceof AbstractRoutinesFacade castedFacade) {
+                wrapperRo.setCallerRoutinesFacade(castedFacade);
+            } else {
+                castedRo.setCallHierarchyHaving(caller);
+                castedRo.setExecutionState(state);
+            }
+            castedRo.clearUnnamedParams();
+            castedRo.putAllUnnamedParams(unnamedParamList);
+            castedRo.putAllParams(namedParams);
         }
-    }
-
-    protected void setupRoutineBase(RoutineBase castedRo) {
-        castedRo.setCallHierarchyHaving(caller);
-        castedRo.setExecutionState(state);
-        castedRo.clearUnnamedParams();
-        castedRo.putAllUnnamedParams(unnamedParamList);
-        castedRo.putAllParams(namedParams);
-    }
-
-    protected void setupWrapperRoutine(ReactionsRoutineWrapper wrapperRo) {
-        if (this.facade instanceof AbstractRoutinesFacade castedFacade) {
-            wrapperRo.setCallerRoutinesFacade(castedFacade);
-        }
-        wrapperRo.clearUnnamedParams();
-        wrapperRo.putAllUnnamedParams(unnamedParamList);
-        wrapperRo.putAllParams(namedParams);
-        // wrapperRo.init();
     }
 }
