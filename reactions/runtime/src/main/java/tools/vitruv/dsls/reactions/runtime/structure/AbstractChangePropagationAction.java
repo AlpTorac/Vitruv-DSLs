@@ -91,6 +91,12 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         return new UnnamedParamIt(this);
     }
 
+    public List<Object> clearUnnamedParams() {
+        var unnamedParams = List.copyOf(this.unnamedParams);
+        this.unnamedParams.clear();
+        return unnamedParams;
+    }
+
     protected URI getFullEObjectURI(EObject eobj) {
         return eobj.eResource().getURI()
                 .appendFragment(

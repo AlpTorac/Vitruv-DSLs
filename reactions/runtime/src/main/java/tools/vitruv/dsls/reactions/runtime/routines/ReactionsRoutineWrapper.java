@@ -81,6 +81,7 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
 
     @Override
     protected boolean executeRoutine() throws IOException {
+        init();
         return roFunc.get().execute();
     }
 
