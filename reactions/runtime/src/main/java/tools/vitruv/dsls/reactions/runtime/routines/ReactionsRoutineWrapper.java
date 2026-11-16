@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
 
@@ -13,6 +14,8 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     protected final String MIR_ROUTINES_PACKAGE_PREFIX = "mir.routines.";
     protected final int MIR_ROUTINES_PACKAGE_PREFIX_LENGTH = MIR_ROUTINES_PACKAGE_PREFIX.length();
 
+    private AbstractReactionsChangePropagationSpecification callerCps;
+    private ReactionsImportPath wrappedRoutineImportPath;
     private AbstractRoutinesFacade callerRoutinesFacade;
     private UnnamedParamIt unnamedParamIt;
 
@@ -37,14 +40,20 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     public ReactionsRoutineWrapper() {
     }
 
-    public RoutinesFacade getCallerRoutinesFacade() {
+    public AbstractRoutinesFacade getCallerRoutinesFacade() {
         return this.callerRoutinesFacade;
     }
 
     public void setCallerRoutinesFacade(AbstractRoutinesFacade callerRoutineFacade) {
         this.callerRoutinesFacade = callerRoutineFacade;
-        setExecutionState(getCallerRoutinesFacade().getExecutionState());
-        setCallHierarchyHaving(getCallerRoutinesFacade().getCurrentCaller());
+    }
+
+    public AbstractReactionsChangePropagationSpecification getCallerCps() {
+        return callerCps;
+    }
+
+    public void setCallerCps(AbstractReactionsChangePropagationSpecification callerCps) {
+        this.callerCps = callerCps;
     }
 
     /**
@@ -62,7 +71,7 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     @SuppressWarnings("unchecked")
     protected <T extends RoutinesFacade> T getFacade() {
         var prov = getProvider();
-        var facade = (T) roFacFunc.apply(prov, getImportPath(prov));
+        var facade = (T) roFacFunc.apply(prov, getWrappedRoutineImportPath());
 
         /*
          * Normally the RoutinesFacadesProvider sets the state of the RoutinesFacade.
@@ -74,9 +83,12 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
         return facade;
     }
 
-    protected ReactionsImportPath getImportPath(RoutinesFacadesProvider provider) {
-        return ReactionsImportPath
-                .fromPathString(provider.getClass().getPackageName().substring(MIR_ROUTINES_PACKAGE_PREFIX_LENGTH));
+    protected void setWrappedRoutineImportPath(String importPathString) {
+        this.wrappedRoutineImportPath = ReactionsImportPath.fromPathString(importPathString);
+    }
+
+    protected ReactionsImportPath getWrappedRoutineImportPath() {
+        return this.wrappedRoutineImportPath;
     }
 
     @Override
@@ -96,9 +108,6 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
      */
     public void setProviderFunc(Function<ReactionExecutionState, RoutinesFacadesProvider> roFacProvFunc) {
         this.roFacProvFunc = roFacProvFunc;
-        if (this.roFacFunc == null) {
-            this.roFacFunc = (prov, imp) -> prov.getRoutinesFacade(imp);
-        }
     }
 
     public BiFunction<RoutinesFacadesProvider, ReactionsImportPath, RoutinesFacade> getFacadeFunc() {
@@ -118,6 +127,26 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     }
 
     public void init() {
+        if (this.getCallerCps() == null) {
+            setCallerCps((AbstractReactionsChangePropagationSpecification) getCallerRoutinesFacade().getExecutionState()
+                    .changePropagationObservable());
+        }
+        if (this.getExecutionState() == null) {
+            setExecutionState(getCallerRoutinesFacade().getExecutionState());
+        }
+        if (this.getProviderFunc() == null) {
+            setProviderFunc((state) -> getCallerCps().getRoutinesFacadesProvider(state));
+        }
+        if (this.getFacadeFunc() == null) {
+            this.roFacFunc = (prov, imp) -> prov.getRoutinesFacade(imp);
+        }
+        if (this.getCalledBy() == null) {
+            setCallHierarchyHaving(getCallerRoutinesFacade().getCurrentCaller());
+        }
+        if (this.getWrappedRoutineImportPath() == null) {
+            setWrappedRoutineImportPath(
+                    getCallerRoutinesFacade().getClass().getPackageName().substring(MIR_ROUTINES_PACKAGE_PREFIX_LENGTH));
+        }
         this.unnamedParamIt = getUnnamedParamIt();
         setup();
     }
