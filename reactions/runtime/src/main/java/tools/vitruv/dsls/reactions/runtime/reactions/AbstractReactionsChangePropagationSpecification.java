@@ -21,6 +21,7 @@ import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondenc
 import tools.vitruv.dsls.reactions.runtime.routines.AbstractRoutinesFacade;
 import tools.vitruv.dsls.reactions.runtime.routines.ReactionsRoutineWrapper;
 import tools.vitruv.dsls.reactions.runtime.routines.Routine;
+import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacadesProvider;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 
@@ -191,7 +192,27 @@ public abstract class AbstractReactionsChangePropagationSpecification
   @Override
   public void setUserInteractor(UserInteractor userInteractor) {
     super.setUserInteractor(userInteractor);
+    /*
+     * The clear() method call was most likely made, in order to reset the
+     * AbstractRoutinesFacades, as they "cache" the RoutinesFacades they generate.
+     * Since now a fresh Reaction instance is generated for each individual Reaction
+     * call, this is no longer necessary.
+     * 
+     * The reason for generating a fresh Reaction instance per Reaction call is that
+     * dynamic parameters have been introduced. By isolating the Reaction instances
+     * for individual Reaction calls, the dynamic parameters are automatically
+     * scoped as intended.
+     */
     setup();
+  }
+
+  public RoutinesFacadesProvider getRoutinesFacadesProvider(final ReactionExecutionState executionState) {
+    return createRoutinesFacadesProvider(executionState);
+  }
+
+  protected RoutinesFacadesProvider createRoutinesFacadesProvider(final ReactionExecutionState executionState) {
+    throw new UnsupportedOperationException(
+        "This change propagation specification does not use a RoutinesFacadesProvider");
   }
 
   /**
