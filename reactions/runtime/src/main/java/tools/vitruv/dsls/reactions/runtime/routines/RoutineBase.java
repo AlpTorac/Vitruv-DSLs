@@ -39,13 +39,23 @@ public abstract class RoutineBase extends AbstractChangePropagationAction implem
 
     public String getDecapitalisedClassName() {
         var clsName = this.getClass().getSimpleName();
+        var sb = new StringBuilder();
 
-        // This check is needed for potential anonymous Routine types
-        if (clsName != null && clsName.length() > 1) {
-            return clsName.substring(0, 1).toLowerCase() + clsName.substring(1);
+        /*
+         * The simple class name can never be null, but it can be empty if the class in
+         * question is anonymous or unnamed. Hence this check is needed for potential
+         * anonymous Routine types.
+         */
+        if (!clsName.isBlank()) {
+            // Decapitalise the class name
+            sb.append(clsName.substring(0, 1).toLowerCase());
+        }
+        if (clsName.length() > 1) {
+            // Append the rest of the class name
+            sb.append(clsName.substring(1));
         }
 
-        return null;
+        return sb.toString();
     }
 
     /**
@@ -57,7 +67,7 @@ public abstract class RoutineBase extends AbstractChangePropagationAction implem
         var decapitalisedClsName = getDecapitalisedClassName();
 
         // This check is needed for potential anonymous Routine types
-        if (decapitalisedClsName != null && decapitalisedClsName.length() > 1) {
+        if (!decapitalisedClsName.isBlank()) {
             if (decapitalisedClsName.endsWith(ROUTINE_CLASS_NAME_SUFFIX)) {
                 decapitalisedClsName = decapitalisedClsName.substring(0,
                         decapitalisedClsName.length() - ROUTINE_CLASS_NAME_SUFFIX_LENGTH);
