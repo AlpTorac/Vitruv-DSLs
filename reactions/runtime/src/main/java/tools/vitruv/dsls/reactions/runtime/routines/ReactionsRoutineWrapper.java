@@ -144,8 +144,11 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
             setCallHierarchyHaving(getCallerRoutinesFacade().getCurrentCaller());
         }
         if (this.getWrappedRoutineImportPath() == null) {
-            setWrappedRoutineImportPath(
-                    getCallerRoutinesFacade().getClass().getPackageName().substring(MIR_ROUTINES_PACKAGE_PREFIX_LENGTH));
+            var facPacName = getCallerRoutinesFacade().getClass().getPackageName();
+            var effectivePacName = facPacName.startsWith(MIR_ROUTINES_PACKAGE_PREFIX)
+                    ? facPacName.substring(MIR_ROUTINES_PACKAGE_PREFIX_LENGTH)
+                    : facPacName;
+            setWrappedRoutineImportPath(effectivePacName);
         }
         this.unnamedParamIt = getUnnamedParamIt();
         setup();
