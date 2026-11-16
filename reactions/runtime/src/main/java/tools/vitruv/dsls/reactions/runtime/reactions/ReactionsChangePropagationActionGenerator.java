@@ -16,6 +16,11 @@ public class ReactionsChangePropagationActionGenerator extends ChangePropagation
         super(minimalActionGen);
     }
 
+    @Override
+    protected AbstractChangePropagationAction getInstanceSample() {
+        return (AbstractChangePropagationAction) super.getInstanceSample();
+    }
+
     public void setBaseIDOverride(String baseIDOverride) {
         this.baseIDOverride = baseIDOverride;
     }
@@ -30,7 +35,7 @@ public class ReactionsChangePropagationActionGenerator extends ChangePropagation
     }
 
     public String getDefaultActionID() {
-        return ((AbstractChangePropagationAction) this.getInstanceSample()).getDefaultID();
+        return getBaseIDOverride() != null ? getBaseIDOverride() : this.getInstanceSample().getDefaultID();
     }
 
     public boolean isBaseIDOverrideEqual(String baseIDOverride) {

@@ -11,6 +11,8 @@ import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHistoryHaving;
 
 public abstract class RoutineBase extends AbstractChangePropagationAction implements Routine {
+    public final static String ROUTINE_CLASS_NAME_SUFFIX = Routine.class.getSimpleName();
+    public final static int ROUTINE_CLASS_NAME_SUFFIX_LENGTH = ROUTINE_CLASS_NAME_SUFFIX.length();
     private ReactionExecutionState executionState;
 
     public RoutineBase(
@@ -35,17 +37,32 @@ public abstract class RoutineBase extends AbstractChangePropagationAction implem
         return (AbstractReactionsChangePropagationSpecification) this.executionState.changePropagationObservable();
     }
 
+    public String getDecapitalisedClassName() {
+        var clsName = this.getClass().getSimpleName();
+
+        // This check is needed for potential anonymous Routine types
+        if (clsName != null && clsName.length() > 1) {
+            return clsName.substring(0, 1).toLowerCase() + clsName.substring(1);
+        }
+
+        return null;
+    }
+
     /**
      * @return The default ID of the calling Routine. By default, de-capitalises the
      *         first letter as per the current Vitruvius Routine naming convention.
      */
     @Override
     public String getDefaultID() {
-        var clsName = this.getClass().getSimpleName();
-        
+        var decapitalisedClsName = getDecapitalisedClassName();
+
         // This check is needed for potential anonymous Routine types
-        if (clsName != null && clsName.length() > 1) {
-            return clsName.substring(0, 1).toLowerCase() + clsName.substring(1);
+        if (decapitalisedClsName != null && decapitalisedClsName.length() > 1) {
+            if (decapitalisedClsName.endsWith(ROUTINE_CLASS_NAME_SUFFIX)) {
+                decapitalisedClsName = decapitalisedClsName.substring(0,
+                        decapitalisedClsName.length() - ROUTINE_CLASS_NAME_SUFFIX_LENGTH);
+            }
+            return decapitalisedClsName;
         } else {
             return super.getDefaultID();
         }

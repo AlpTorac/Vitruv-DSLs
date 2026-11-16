@@ -7,13 +7,27 @@ import java.util.function.Supplier;
 
 import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
+import tools.vitruv.dsls.reactions.runtime.structure.AbstractChangePropagationAction;
 import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
 
 public abstract class ReactionsRoutineWrapper extends RoutineBase {
+    public static final String REACTIONS_ROUTINE_WRAPPER_SUFFIX = "Wrapper";
+    public static final int REACTIONS_ROUTINE_WRAPPER_SUFFIX_LENGTH = REACTIONS_ROUTINE_WRAPPER_SUFFIX.length();
+
+    /**
+     * All concrete implementors of this class' names should end with this suffix,
+     * so that the default ID computation works as intended.
+     */
+    public static final String REACTIONS_ROUTINE_WRAPPER_CLASS_NAME_SUFFIX = RoutineBase.ROUTINE_CLASS_NAME_SUFFIX
+            + REACTIONS_ROUTINE_WRAPPER_SUFFIX;
+    public static final int REACTIONS_ROUTINE_WRAPPER_CLASS_NAME_SUFFIX_LENGTH = REACTIONS_ROUTINE_WRAPPER_CLASS_NAME_SUFFIX
+            .length();
+
     // TODO: Replace with the constants from the Reactions language
     protected final String MIR_ROUTINES_PACKAGE_PREFIX = "mir.routines.";
     protected final int MIR_ROUTINES_PACKAGE_PREFIX_LENGTH = MIR_ROUTINES_PACKAGE_PREFIX.length();
 
+    private String wrappedRoutineIDOverride;
     private AbstractReactionsChangePropagationSpecification callerCps;
     private ReactionsImportPath wrappedRoutineImportPath;
     private AbstractRoutinesFacade callerRoutinesFacade;
@@ -38,6 +52,14 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     private Supplier<Routine> roFunc;
 
     public ReactionsRoutineWrapper() {
+    }
+
+    public String getWrappedRoutineIDOverride() {
+        return wrappedRoutineIDOverride;
+    }
+
+    public void setWrappedRoutineIDOverride(String wrappedRoutineIDOverride) {
+        this.wrappedRoutineIDOverride = wrappedRoutineIDOverride;
     }
 
     public AbstractRoutinesFacade getCallerRoutinesFacade() {
@@ -94,7 +116,11 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     @Override
     protected boolean executeRoutine() throws IOException {
         init();
-        return roFunc.get().execute();
+        var ro = roFunc.get();
+        if (this.getWrappedRoutineIDOverride() != null && ro instanceof AbstractChangePropagationAction castedRo) {
+            castedRo.setID(this.getWrappedRoutineIDOverride());
+        }
+        return ro.execute();
     }
 
     public Function<ReactionExecutionState, RoutinesFacadesProvider> getProviderFunc() {
@@ -152,6 +178,35 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
         }
         this.unnamedParamIt = getUnnamedParamIt();
         setup();
+    }
+
+    public String getWrappedRoutineDefaultID() {
+        var decapitalisedClsName = getDecapitalisedClassName();
+
+        // This check is needed for potential anonymous Routine types
+        if (decapitalisedClsName != null && decapitalisedClsName.length() > 1) {
+            if (decapitalisedClsName.endsWith(REACTIONS_ROUTINE_WRAPPER_CLASS_NAME_SUFFIX)) {
+                decapitalisedClsName = decapitalisedClsName.substring(0,
+                        decapitalisedClsName.length() - REACTIONS_ROUTINE_WRAPPER_CLASS_NAME_SUFFIX_LENGTH);
+            }
+            return decapitalisedClsName;
+        }
+        return null;
+    }
+
+    /**
+     * @return The default ID of this instance, which is (by default) not the same
+     *         as the Routine it wraps.
+     */
+    @Override
+    public String getDefaultID() {
+        var wrappedRoutineDefaultID = getWrappedRoutineDefaultID();
+
+        if (wrappedRoutineDefaultID != null) {
+            return wrappedRoutineDefaultID + REACTIONS_ROUTINE_WRAPPER_SUFFIX;
+        } else {
+            return super.getDefaultID();
+        }
     }
 
     protected abstract void setup();
