@@ -15,6 +15,7 @@ public class DefaultControlFlow extends ControlFlowBase {
         for (var reaction : reactions) {
             reaction.setCallHierarchyHaving(this);
             reaction.execute(change, state);
+            this.addCalledAction(reaction);
         }
     }
 

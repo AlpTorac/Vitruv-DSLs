@@ -6,7 +6,7 @@ import java.util.Map;
 
 import tools.vitruv.dsls.reactions.runtime.structure.ChangePropagationAction;
 
-public class DefaultChangePropagationActionContainer implements ReactionsChangePropagationActionContainer {
+public class DefaultChangePropagationActionContainer implements ChangePropagationActionContainer {
     private Map<String, ChangePropagationActionGenerator> idToGensMap;
 
     public DefaultChangePropagationActionContainer() {

@@ -1,5 +1,6 @@
 package tools.vitruv.dsls.reactions.runtime.reactions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,23 +19,24 @@ import tools.vitruv.change.utils.ResourceAccess;
 import tools.vitruv.dsls.reactions.runtime.controlflows.DefaultControlFlow;
 import tools.vitruv.dsls.reactions.runtime.correspondence.CorrespondenceFactory;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
-import tools.vitruv.dsls.reactions.runtime.routines.AbstractRoutinesFacade;
-import tools.vitruv.dsls.reactions.runtime.routines.ReactionsRoutineWrapper;
 import tools.vitruv.dsls.reactions.runtime.routines.Routine;
 import tools.vitruv.dsls.reactions.runtime.routines.RoutinesFacadesProvider;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
-import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
+import tools.vitruv.dsls.reactions.runtime.structure.AbstractChangePropagationAction;
+import tools.vitruv.dsls.reactions.runtime.structure.CallHistoryHaving;
 
 /**
  * A {@link ChangePropagationSpecification} that executes {@link Reaction}s.
  */
 public abstract class AbstractReactionsChangePropagationSpecification
-    extends AbstractChangePropagationSpecification {
+    extends AbstractChangePropagationSpecification implements CallHistoryHaving {
   private static Logger logger = LogManager.getLogger(
       AbstractReactionsChangePropagationSpecification.class);
 
   private String rootControlFlowID;
   private ReactionsChangePropagationActionContainer con;
+
+  private final List<AbstractChangePropagationAction> calledActions = new ArrayList<>();
 
   /**
    * Creates an {@link AbstractReactionsChangePropagationSpecification} without
@@ -88,43 +90,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
     this.con = con;
   }
 
-  public Object delegateToReaction(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state,
-      String reactionID) {
-    var re = this.getActionContainer().getReaction(reactionID);
-    re.setCallHierarchyHaving(caller);
-    return re.executeAction(change, state);
-  }
-
   public Routine getRoutine(String routineID) {
     return this.getActionContainer().getRoutine(routineID);
-  }
-
-  public ReactionsRoutineWrapper getRoutineWrapper(String routineID) {
-    return (ReactionsRoutineWrapper) this.getActionContainer().getRoutine(routineID);
-  }
-
-  public Object delegateToJavaRoutine(CallHierarchyHaving caller, ReactionExecutionState state, String routineID,
-      List<Object> paramVals) {
-    var ro = this.getActionContainer().getRoutine(routineID);
-    ro.setCallHierarchyHaving(caller);
-    ro.setExecutionState(state);
-    ro.putAllUnnamedParams(paramVals);
-    return ro.execute();
-  }
-
-  public Object delegateToReactionsRoutine(AbstractRoutinesFacade roFac, String routineID, List<Object> paramVals) {
-    var ro = this.getRoutineWrapper(routineID);
-    ro.setCallerRoutinesFacade(roFac);
-    ro.putAllUnnamedParams(paramVals);
-    ro.init();
-    return ro.execute();
-  }
-
-  public Object delegateToControlFlow(CallHierarchyHaving caller, EChange<EObject> change, ReactionExecutionState state,
-      String controlFlowID) {
-    var cf = this.getActionContainer().getControlFlow(controlFlowID);
-    cf.setCallHierarchyHaving(caller);
-    return cf.executeAction(change, state);
   }
 
   /**
@@ -138,8 +105,10 @@ public abstract class AbstractReactionsChangePropagationSpecification
    */
   @Deprecated
   protected void addReaction(Reaction reaction) {
-    this.con.addAbsentActionGen(((AbstractReaction) reaction).getID(),
-        new ReactionsChangePropagationActionGenerator(() -> ((AbstractReaction) reaction).clone()));
+    var id = ((AbstractReaction) reaction).getID();
+    this.con.addAbsentActionGen(id,
+        new ReactionsChangePropagationActionGenerator(() -> ((AbstractReaction) reaction).clone())
+            .withBaseIDOverride(id));
   }
 
   /**
@@ -180,7 +149,9 @@ public abstract class AbstractReactionsChangePropagationSpecification
     logger.trace("Call relevant reactions from %s to %s",
         getSourceMetamodelDescriptor(), getTargetMetamodelDescriptor());
     var state = getState(correspondenceModel, resourceAccess);
-    delegateToControlFlow(null, change, state, rootControlFlowID);
+    var cf = this.getActionContainer().getControlFlow(rootControlFlowID);
+    addCalledAction(cf);
+    cf.executeAction(change, state);
   }
 
   private static EditableCorrespondenceModelView<ReactionsCorrespondence> getReactionsView(
@@ -204,6 +175,21 @@ public abstract class AbstractReactionsChangePropagationSpecification
      * scoped as intended.
      */
     setup();
+  }
+
+  @Override
+  public List<AbstractChangePropagationAction> getCalledActions() {
+    return List.copyOf(calledActions);
+  }
+
+  @Override
+  public void clearCalledActions() {
+    this.calledActions.clear();
+  }
+
+  @Override
+  public void addCalledAction(AbstractChangePropagationAction calledAction) {
+    this.calledActions.add(calledAction);
   }
 
   public RoutinesFacadesProvider getRoutinesFacadesProvider(final ReactionExecutionState executionState) {

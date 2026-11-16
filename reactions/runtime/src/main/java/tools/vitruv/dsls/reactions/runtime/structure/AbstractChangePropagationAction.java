@@ -10,11 +10,13 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 
 public abstract class AbstractChangePropagationAction extends CallHierarchyHaving
-        implements ChangePropagationAction {
+        implements ChangePropagationAction, CallHistoryHaving {
     private String id;
 
     private final Map<String, Object> paramNameToVal = new LinkedHashMap<>();
     private final List<Object> unnamedParams = new ArrayList<>();
+
+    private final List<AbstractChangePropagationAction> calledActions = new ArrayList<>();
 
     public AbstractChangePropagationAction(CallHierarchyHaving caller) {
         super(caller);
@@ -103,14 +105,32 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
                         eobj.eResource().getURIFragment(eobj));
     }
 
+    @Override
+    public void addCalledAction(AbstractChangePropagationAction calledAction) {
+        this.calledActions.add(calledAction);
+    }
+
+    @Override
+    public void clearCalledActions() {
+        this.calledActions.clear();
+    }
+
+    @Override
+    public List<AbstractChangePropagationAction> getCalledActions() {
+        return List.copyOf(calledActions);
+    }
+
     protected static class UnnamedParamIt {
         private final Iterator<Object> unnamedParamIt;
+
         public UnnamedParamIt(AbstractChangePropagationAction action) {
             this.unnamedParamIt = action.getUnnamedParams().iterator();
         }
+
         public boolean hasNext() {
             return unnamedParamIt.hasNext();
         }
+
         @SuppressWarnings("unchecked")
         public <T> T next() {
             return (T) unnamedParamIt.next();

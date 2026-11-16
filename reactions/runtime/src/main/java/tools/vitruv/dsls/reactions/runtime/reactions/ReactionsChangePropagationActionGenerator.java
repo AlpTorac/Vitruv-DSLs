@@ -20,6 +20,11 @@ public class ReactionsChangePropagationActionGenerator extends ChangePropagation
         this.baseIDOverride = baseIDOverride;
     }
 
+    public ReactionsChangePropagationActionGenerator withBaseIDOverride(String baseIDOverride) {
+        this.setBaseIDOverride(baseIDOverride);
+        return this;
+    }
+
     public String getBaseIDOverride() {
         return this.baseIDOverride;
     }

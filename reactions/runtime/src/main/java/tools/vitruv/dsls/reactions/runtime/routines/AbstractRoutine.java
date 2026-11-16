@@ -2,8 +2,6 @@ package tools.vitruv.dsls.reactions.runtime.routines;
 
 import java.io.IOException;
 
-import org.eclipse.xtext.xbase.lib.Exceptions;
-
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
@@ -46,16 +44,13 @@ public abstract class AbstractRoutine extends RoutineBase implements Cloneable {
   @Override
   public boolean execute() {
     routinesFacade.pushCaller(this);
-    var success = false;
+    return super.execute();
+  }
 
-    try {
-      success = executeRoutine();
-    } catch (Exception e) {
-      throw Exceptions.sneakyThrow(e);
-    } finally {
-      routinesFacade.dropLastCaller();
-    }
-    return success;
+  @Override
+  protected void finallyAfterExecution(boolean wasSuccessful, Throwable throwable) {
+    super.finallyAfterExecution(wasSuccessful, throwable);
+    routinesFacade.dropLastCaller();
   }
 
   /**

@@ -8,12 +8,14 @@ import tools.vitruv.dsls.reactions.runtime.structure.AbstractChangePropagationAc
 
 public interface ReactionsChangePropagationActionContainer extends ChangePropagationActionContainer {
 	public default boolean addAbsentActionGen(String actionIdOverride, AbstractChangePropagationAction action) {
-		return this.addAbsentActionGen(actionIdOverride, new ReactionsChangePropagationActionGenerator(action));
+		return this.addAbsentActionGen(actionIdOverride,
+				new ReactionsChangePropagationActionGenerator(action).withBaseIDOverride(actionIdOverride));
 	}
 
 	public default ChangePropagationActionGenerator overrideActionGen(String actionIdOverride,
 			AbstractChangePropagationAction action) {
-		return this.overrideActionGen(actionIdOverride, new ReactionsChangePropagationActionGenerator(action));
+		return this.overrideActionGen(actionIdOverride,
+				new ReactionsChangePropagationActionGenerator(action).withBaseIDOverride(actionIdOverride));
 	}
 
 	public default boolean addAbsentActionGen(AbstractChangePropagationAction action) {
