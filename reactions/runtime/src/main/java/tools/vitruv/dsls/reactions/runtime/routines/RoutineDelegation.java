@@ -217,6 +217,7 @@ public class RoutineDelegation {
             if (ro instanceof ReactionsRoutineWrapper wrapperRo
                     && this.facade instanceof AbstractRoutinesFacade castedFacade) {
                 wrapperRo.setCallerRoutinesFacade(castedFacade);
+                wrapperRo.init();
             } else {
                 castedRo.setCallHierarchyHaving(caller);
                 castedRo.setExecutionState(state);
