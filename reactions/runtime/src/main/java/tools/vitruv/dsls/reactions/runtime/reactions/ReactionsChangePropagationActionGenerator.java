@@ -34,7 +34,7 @@ public class ReactionsChangePropagationActionGenerator extends ChangePropagation
         return this.baseIDOverride;
     }
 
-    public String getDefaultActionID() {
+    public String getDefaultActionGenID() {
         return getBaseIDOverride() != null ? getBaseIDOverride() : this.getInstanceSample().getDefaultID();
     }
 

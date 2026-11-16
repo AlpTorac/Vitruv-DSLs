@@ -35,7 +35,7 @@ public class WrappedReactionsRoutineGenerator extends ReactionsChangePropagation
         return (WrappedReactionsRoutineGenerator) super.withBaseIDOverride(baseIDOverride);
     }
 
-    public String getDefaultActionID() {
+    public String getDefaultActionGenID() {
         return getWrappedRoutineBaseIDOverride() != null ? getWrappedRoutineBaseIDOverride()
                 : this.getInstanceSample().getWrappedRoutineDefaultID();
     }

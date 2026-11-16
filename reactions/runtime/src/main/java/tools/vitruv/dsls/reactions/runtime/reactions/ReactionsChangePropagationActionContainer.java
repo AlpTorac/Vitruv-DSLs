@@ -9,13 +9,17 @@ import tools.vitruv.dsls.reactions.runtime.structure.AbstractChangePropagationAc
 public interface ReactionsChangePropagationActionContainer extends ChangePropagationActionContainer {
 	public default boolean addAbsentActionGen(String actionIdOverride, AbstractChangePropagationAction action) {
 		return this.addAbsentActionGen(actionIdOverride,
-				new ReactionsChangePropagationActionGenerator(action).withBaseIDOverride(actionIdOverride));
+				new ReactionsChangePropagationActionGenerator(action)
+				// .withBaseIDOverride(actionIdOverride)
+			);
 	}
 
 	public default ChangePropagationActionGenerator overrideActionGen(String actionIdOverride,
 			AbstractChangePropagationAction action) {
 		return this.overrideActionGen(actionIdOverride,
-				new ReactionsChangePropagationActionGenerator(action).withBaseIDOverride(actionIdOverride));
+				new ReactionsChangePropagationActionGenerator(action)
+				// .withBaseIDOverride(actionIdOverride)
+			);
 	}
 
 	public default boolean addAbsentActionGen(AbstractChangePropagationAction action) {
@@ -27,12 +31,12 @@ public interface ReactionsChangePropagationActionContainer extends ChangePropaga
 	}
 
 	public default boolean addAbsentActionGen(ReactionsChangePropagationActionGenerator actionGen) {
-		return this.addAbsentActionGen(actionGen.getDefaultActionID(), actionGen);
+		return this.addAbsentActionGen(actionGen.getDefaultActionGenID(), actionGen);
 	}
 
 	public default ChangePropagationActionGenerator overrideActionGen(
 			ReactionsChangePropagationActionGenerator actionGen) {
-		return this.overrideActionGen(actionGen.getDefaultActionID(), actionGen);
+		return this.overrideActionGen(actionGen.getDefaultActionGenID(), actionGen);
 	}
 
 	/**

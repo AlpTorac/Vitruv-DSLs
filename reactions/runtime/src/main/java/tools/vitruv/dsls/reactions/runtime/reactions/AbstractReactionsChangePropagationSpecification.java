@@ -105,10 +105,8 @@ public abstract class AbstractReactionsChangePropagationSpecification
    */
   @Deprecated
   protected void addReaction(Reaction reaction) {
-    var id = ((AbstractReaction) reaction).getID();
-    this.con.addAbsentActionGen(id,
-        new ReactionsChangePropagationActionGenerator(() -> ((AbstractReaction) reaction).clone())
-            .withBaseIDOverride(id));
+    this.con.addAbsentActionGen(((AbstractReaction) reaction).getID(),
+        new ReactionsChangePropagationActionGenerator(() -> ((AbstractReaction) reaction).clone()));
   }
 
   /**

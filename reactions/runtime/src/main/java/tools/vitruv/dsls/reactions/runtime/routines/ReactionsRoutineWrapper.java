@@ -181,6 +181,9 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     }
 
     public String getWrappedRoutineDefaultID() {
+        if (this.wrappedRoutineIDOverride != null)
+            return this.wrappedRoutineIDOverride;
+
         var decapitalisedClsName = getDecapitalisedClassName();
 
         // This check is needed for potential anonymous Routine types
