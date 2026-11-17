@@ -15,16 +15,12 @@ import tools.vitruv.dsls.reactions.runtime.structure.ReactionsImportPath;
  * {@link #createRoutinesFacade(ReactionsImportPath)}
  * to create the routines facades of the handled import hierarchy there.
  */
-public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacadesProvider
-// , Cloneable
-{
+public abstract class AbstractRoutinesFacadesProvider extends RoutinesFacadesProviderBase {
 
   /**
    * Routine facades that were created so far.
    */
   private final Map<ReactionsImportPath, AbstractRoutinesFacade> routinesFacades = new HashMap<>();
-
-  private ReactionExecutionState executionState;
 
   /**
    * Creates a new {@link AbstractRoutinesFacadesProvider}.
@@ -32,15 +28,7 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
    * @param executionState - {@link ReactionExecutionState}
    */
   protected AbstractRoutinesFacadesProvider(ReactionExecutionState executionState) {
-    this.executionState = executionState;
-  }
-
-  public ReactionExecutionState getExecutionState() {
-    return executionState;
-  }
-
-  public void setExecutionState(ReactionExecutionState executionState) {
-    this.executionState = executionState;
+    super(executionState);
   }
 
   /**
@@ -65,33 +53,11 @@ public abstract class AbstractRoutinesFacadesProvider implements RoutinesFacades
     // create the routines facade:
     routinesFacade = (T) this.createRoutinesFacade(reactionsImportPath);
     if (routinesFacade != null) {
-      routinesFacade.setExecutionState(executionState);
+      routinesFacade.setExecutionState(getExecutionState());
       // store created routines facade:
       routinesFacades.put(reactionsImportPath, routinesFacade);
       return routinesFacade;
     }
     return routinesFacade;
   }
-
-  // /**
-  //  * Creates a clone of this instance
-  //  * 
-  //  * @see java.lang.Object#clone()
-  //  */
-  // @Override
-  // public AbstractRoutinesFacadesProvider clone() {
-  //   try {
-  //     var clone = (AbstractRoutinesFacadesProvider) super.clone();
-  //     if (executionState != null) {
-  //       clone.executionState = new ReactionExecutionState(executionState.userInteractor(),
-  //           executionState.getCorrespondenceModel(), executionState.getResourceAccess(),
-  //           executionState.changePropagationObservable());
-  //     }
-  //     // Do not clone the routinesFacades, in order to avoid provider field inconsistencies
-  //     clone.routinesFacades = new HashMap<>();
-  //     return clone;
-  //   } catch (CloneNotSupportedException e) {
-  //     throw new UnsupportedOperationException(e);
-  //   }
-  // }
 }
