@@ -18,10 +18,4 @@ public class DefaultControlFlow extends ControlFlowBase {
             this.addCalledAction(reaction);
         }
     }
-
-    @Override
-    public Object executeAction(EChange<EObject> change, ReactionExecutionState state) {
-        propagateChange(change, state);
-        return true;
-    }
 }
