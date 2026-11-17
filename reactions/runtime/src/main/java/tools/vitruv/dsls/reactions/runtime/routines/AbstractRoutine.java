@@ -1,6 +1,11 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import org.eclipse.emf.ecore.EObject;
 
 import tools.vitruv.change.correspondence.view.EditableCorrespondenceModelView;
 import tools.vitruv.dsls.reactions.runtime.correspondence.ReactionsCorrespondence;
@@ -74,11 +79,39 @@ public abstract class AbstractRoutine extends RoutineBase implements Cloneable {
     return super.clone();
   }
 
+  /*
+   * The inner classes below and the method overrides therein are required by
+   * other Reactions packages. Otherwise, some Reactions language code generation
+   * tests fail and generated Routines classes do not compile as intended.
+   * 
+   * They are only placeholders and do not introduce any additional functionality.
+   */
+
   // Placeholder type so that the generated Routines remain valid
   protected static class CorrespondenceRetriever
       extends tools.vitruv.dsls.reactions.runtime.routines.CorrespondenceRetriever {
     protected CorrespondenceRetriever(EditableCorrespondenceModelView<ReactionsCorrespondence> correspondenceModel) {
       super(correspondenceModel);
+    }
+
+    @Override
+    protected <T extends EObject> T getCorrespondingElement(EObject correspondenceSource, Class<T> expectedType,
+        Predicate<T> correspondencePreconditionMethod, String tag, boolean asserted) {
+      return super.getCorrespondingElement(correspondenceSource, expectedType, correspondencePreconditionMethod, tag,
+          asserted);
+    }
+
+    @Override
+    protected <T extends EObject> Collection<T> getCorrespondingElements(EObject correspondenceSource,
+        Class<T> expectedType, Predicate<T> correspondencePreconditionMethod, String expectedTag) {
+      return super.getCorrespondingElements(correspondenceSource, expectedType, correspondencePreconditionMethod,
+          expectedTag);
+    }
+
+    @Override
+    protected <T extends EObject> boolean hasCorrespondingElements(EObject correspondenceSource, Class<T> expectedType,
+        Predicate<T> correspondencePreconditionMethod, String tag) {
+      return super.hasCorrespondingElements(correspondenceSource, expectedType, correspondencePreconditionMethod, tag);
     }
   }
 
@@ -87,12 +120,37 @@ public abstract class AbstractRoutine extends RoutineBase implements Cloneable {
     protected Match(ReactionExecutionState executionState) {
       super(executionState);
     }
+
+    @Override
+    protected <T extends EObject> T getCorrespondingElement(EObject correspondenceSource, Class<T> expectedType,
+        Predicate<T> correspondencePreconditionMethod, String tag, boolean asserted) {
+      return super.getCorrespondingElement(correspondenceSource, expectedType, correspondencePreconditionMethod, tag,
+          asserted);
+    }
+
+    @Override
+    protected <T extends EObject> Collection<T> getCorrespondingElements(EObject correspondenceSource,
+        Class<T> expectedType, Predicate<T> correspondencePreconditionMethod, String expectedTag) {
+      return super.getCorrespondingElements(correspondenceSource, expectedType, correspondencePreconditionMethod,
+          expectedTag);
+    }
+
+    @Override
+    protected <T extends EObject> boolean hasCorrespondingElements(EObject correspondenceSource, Class<T> expectedType,
+        Predicate<T> correspondencePreconditionMethod, String tag) {
+      return super.hasCorrespondingElements(correspondenceSource, expectedType, correspondencePreconditionMethod, tag);
+    }
   }
 
   // Placeholder type so that the generated Routines remain valid
   public static class Create extends tools.vitruv.dsls.reactions.runtime.routines.Create {
     protected Create(ReactionExecutionState executionState) {
       super(executionState);
+    }
+
+    @Override
+    protected <T extends EObject> T createObject(Supplier<T> creator) {
+      return super.createObject(creator);
     }
   }
 
@@ -101,5 +159,57 @@ public abstract class AbstractRoutine extends RoutineBase implements Cloneable {
     protected Update(ReactionExecutionState executionState) {
       super(executionState);
     }
+
+    @Override
+    protected <T extends EObject> T getCorrespondingElement(EObject correspondenceSource, Class<T> expectedType,
+        Predicate<T> correspondencePreconditionMethod, String tag, boolean asserted) {
+      return super.getCorrespondingElement(correspondenceSource, expectedType, correspondencePreconditionMethod, tag,
+          asserted);
+    }
+
+    @Override
+    protected <T extends EObject> Collection<T> getCorrespondingElements(EObject correspondenceSource,
+        Class<T> expectedType, Predicate<T> correspondencePreconditionMethod, String expectedTag) {
+      return super.getCorrespondingElements(correspondenceSource, expectedType, correspondencePreconditionMethod,
+          expectedTag);
+    }
+
+    @Override
+    protected <T extends EObject> boolean hasCorrespondingElements(EObject correspondenceSource, Class<T> expectedType,
+        Predicate<T> correspondencePreconditionMethod, String tag) {
+      return super.hasCorrespondingElements(correspondenceSource, expectedType, correspondencePreconditionMethod, tag);
+    }
+
+    @Override
+    protected void addCorrespondenceBetween(EObject firstElement, EObject secondElement) {
+      super.addCorrespondenceBetween(firstElement, secondElement);
+    }
+
+    @Override
+    protected void addCorrespondenceBetween(EObject firstElement, EObject secondElement, String tag) {
+      super.addCorrespondenceBetween(firstElement, secondElement, tag);
+    }
+
+    @Override
+    protected void persistProjectRelative(EObject alreadyPersistedObject, EObject elementToPersist,
+        String persistencePath) {
+      super.persistProjectRelative(alreadyPersistedObject, elementToPersist, persistencePath);
+    }
+
+    @Override
+    protected void removeCorrespondenceBetween(EObject firstElement, EObject secondElement) {
+      super.removeCorrespondenceBetween(firstElement, secondElement);
+    }
+
+    @Override
+    protected void removeCorrespondenceBetween(EObject firstElement, EObject secondElement, String tag) {
+      super.removeCorrespondenceBetween(firstElement, secondElement, tag);
+    }
+
+    @Override
+    protected void removeObject(EObject element) {
+      super.removeObject(element);
+    }
+
   }
 }
