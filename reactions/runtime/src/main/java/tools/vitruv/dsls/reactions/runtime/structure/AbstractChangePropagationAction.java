@@ -43,21 +43,30 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         return Map.copyOf(paramNameToVal);
     }
 
-    public void putAllParams(AbstractChangePropagationAction caller) {
-        this.paramNameToVal.putAll(caller.paramNameToVal);
+    public Map<String, Object> putAllParams(AbstractChangePropagationAction caller) {
+        return putAllParams(caller.getAllParams());
     }
 
-    public void putAllParams(Map<String, Object> params) {
-        this.paramNameToVal.putAll(params);
+    public Map<String, Object> putAllParams(Map<String, Object> params) {
+        var overriddenVals = new LinkedHashMap<String, Object>();
+        for (var e : params.entrySet()) {
+            var paramName = e.getKey();
+            var paramVal = e.getValue();
+            if (hasParam(paramName)) {
+                overriddenVals.put(paramName, getParam(paramName));
+            }
+            putParam(paramName, paramVal);
+        }
+        return overriddenVals;
     }
 
-    public void putParam(String paramName, Object paramVal) {
-        this.paramNameToVal.put(paramName, paramVal);
+    public Object putParam(String paramName, Object paramVal) {
+        return this.paramNameToVal.put(paramName, paramVal);
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getParam(String paramName) {
-        if (hasParam(paramName)) {
+        if (hasParamDirectly(paramName)) {
             var val = this.paramNameToVal.get(paramName);
             return val != null ? (T) val : null;
         }
@@ -65,11 +74,24 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller)
             return castedCaller.getParam(paramName);
 
-        return null;
+        throw new IllegalArgumentException("No parameter " + paramName + " is accessible");
     }
 
+    // TODO: Consider implementing getParamDirectly, getParamViaCallers
+
     public boolean hasParam(String paramName) {
+        return hasParamDirectly(paramName) || hasParamViaCallers(paramName);
+    }
+
+    public boolean hasParamDirectly(String paramName) {
         return this.paramNameToVal.containsKey(paramName);
+    }
+
+    public boolean hasParamViaCallers(String paramName) {
+        if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller)
+            return castedCaller.hasParamDirectly(paramName) || castedCaller.hasParamViaCallers(paramName);
+
+        return false;
     }
 
     public void putUnnamedParam(Object paramVal) {
