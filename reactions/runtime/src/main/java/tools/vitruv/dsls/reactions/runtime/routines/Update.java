@@ -160,6 +160,18 @@ public class Update extends CorrespondenceRetriever {
         return new RoutineDelegation().viaFacade(facade);
     }
 
+    /**
+     * @param facade The facade of the Routine / Reaction that contains this block
+     * @return The Routine that contains this block
+     */
+    protected RoutineBase getCurrentRoutine(AbstractRoutinesFacade facade) {
+        return (RoutineBase) facade.getCurrentCaller();
+    }
+
+    protected <T> T getParam(AbstractRoutinesFacade facade, String paramName) {
+        return this.getCurrentRoutine(facade).getParam(paramName);
+    }
+
     // /**
     //  * @return The {@link AbstractReactionsChangePropagationSpecification} from the
     //  *         executionState.
@@ -214,18 +226,6 @@ public class Update extends CorrespondenceRetriever {
     // protected Object delegateToReactionsRoutine(AbstractRoutinesFacade facade, String routineID, Object... params) {
     //     List<Object> paramList = params != null ? List.of(params) : List.of();
     //     return delegateToReactionsRoutine(facade, routineID, paramList);
-    // }
-
-    // /**
-    //  * @param facade The facade of the Routine / Reaction that contains this block
-    //  * @return The Routine that contains this block
-    //  */
-    // protected RoutineBase getCurrentRoutine(AbstractRoutinesFacade facade) {
-    //     return (RoutineBase) facade.getCurrentCaller();
-    // }
-
-    // protected <T> T getParam(AbstractRoutinesFacade facade, String paramName) {
-    //     return this.getCurrentRoutine(facade).getParam(paramName);
     // }
 
     // protected void putParam(AbstractRoutinesFacade facade, String paramName, Object paramVal) {
