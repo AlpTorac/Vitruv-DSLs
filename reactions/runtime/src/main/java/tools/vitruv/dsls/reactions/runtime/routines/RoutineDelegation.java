@@ -77,7 +77,7 @@ public class RoutineDelegation {
     //
     //
 
-    public RoutineDelegation to(String routineID) {
+    public RoutineDelegation toRoutine(String routineID) {
         this.routineID = routineID;
         return this;
     }
@@ -154,7 +154,7 @@ public class RoutineDelegation {
         return (T) routine;
     }
 
-    public Object execute() {
+    public Object runRoutine() {
         var ro = getRoutine();
         return ro.execute();
     }
