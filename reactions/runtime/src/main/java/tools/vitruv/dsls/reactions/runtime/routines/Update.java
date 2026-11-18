@@ -1,6 +1,7 @@
 package tools.vitruv.dsls.reactions.runtime.routines;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.Logger;
 import org.eclipse.emf.common.util.URI;
@@ -158,6 +159,15 @@ public class Update extends CorrespondenceRetriever {
 
     protected RoutineDelegation delegateToRoutineViaFacade(RoutinesFacade facade) {
         return new RoutineDelegation().viaFacade(facade);
+    }
+
+    protected RoutineDelegation getDelegationFromParam(AbstractRoutinesFacade facade, String paramName, Object...input) {
+        var currentRoutine = getCurrentRoutine(facade);
+        @SuppressWarnings("unchecked")
+        // TODO: Define an actual class for this complex function
+        var delFunc = (Function<List<?>, RoutineDelegation>) currentRoutine.getParam(paramName);
+        var inputList = input != null ? List.of(input) : List.of();
+        return delFunc.apply(inputList).viaFacade(facade);
     }
 
     /**
