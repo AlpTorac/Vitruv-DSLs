@@ -11,7 +11,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 
 public abstract class AbstractChangePropagationAction extends CallHierarchyHaving
-        implements ChangePropagationAction, CallHistoryHaving {
+        implements ChangePropagationAction, CallHistoryHaving<AbstractChangePropagationAction> {
     private String id;
 
     private final Map<ChangePropagationParameter, Object> paramToVal = new LinkedHashMap<>();
