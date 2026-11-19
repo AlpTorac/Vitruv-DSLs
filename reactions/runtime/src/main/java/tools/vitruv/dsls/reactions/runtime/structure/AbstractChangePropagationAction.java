@@ -1,6 +1,7 @@
 package tools.vitruv.dsls.reactions.runtime.structure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,7 +41,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
     }
 
     public Map<ChangePropagationParameter, Object> getAllParams() {
-        return Map.copyOf(paramToVal);
+        // Deliberately use LinkedHashMap to allow null values
+        return new LinkedHashMap<>(paramToVal);
     }
 
     /**
@@ -53,6 +55,7 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
 
     public Map<ChangePropagationParameter, Object> putAllParams(Map<ChangePropagationParameter, Object> params)
             throws IllegalArgumentException {
+        // Deliberately use LinkedHashMap to allow null values
         var overriddenVals = new LinkedHashMap<ChangePropagationParameter, Object>();
         for (var e : params.entrySet()) {
             var param = e.getKey();
@@ -138,25 +141,37 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         this.unnamedParams.add(paramVal);
     }
 
-    public void putAllUnnamedParams(List<Object> paramVals) {
+    public void putUnnamedParamAt(Object paramVal, int index) {
+        this.unnamedParams.add(index, paramVal);
+    }
+
+    public void putAllUnnamedParams(Collection<?> paramVals) {
         this.unnamedParams.addAll(paramVals);
     }
 
     @SuppressWarnings("unchecked")
     public <T> T getUnnamedParam(int index) {
-        return (T) this.unnamedParams.get(index);
+        var unnamedParam = this.unnamedParams.get(index);
+        return unnamedParam != null ? (T) unnamedParam : null;
     }
 
     public List<Object> getUnnamedParams() {
-        return List.copyOf(unnamedParams);
+        // Deliberately use ArrayList to allow null values
+        return new ArrayList<>(unnamedParams);
     }
 
     public UnnamedParamIt getUnnamedParamIt() {
         return new UnnamedParamIt(this);
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T removeUnnamedParam(int index) {
+        var removedVal = this.unnamedParams.remove(index);
+        return removedVal != null ? (T) removedVal : null;
+    }
+
     public List<Object> clearUnnamedParams() {
-        var unnamedParams = List.copyOf(this.unnamedParams);
+        var unnamedParams = this.getUnnamedParams();
         this.unnamedParams.clear();
         return unnamedParams;
     }
@@ -182,11 +197,27 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         return List.copyOf(calledActions);
     }
 
-    protected static class UnnamedParamIt {
+    /**
+     * A convenience class that enables retrieving unnamed parameters of an action
+     * instance easier and using them without having to type-cast.
+     */
+    public static class UnnamedParamIt {
+        private final Collection<Object> unnamedParamList;
+
+        private int unnamedParamItIndex = 0;
         private final Iterator<Object> unnamedParamIt;
 
-        public UnnamedParamIt(AbstractChangePropagationAction action) {
-            this.unnamedParamIt = action.getUnnamedParams().iterator();
+        protected UnnamedParamIt(AbstractChangePropagationAction action) {
+            this.unnamedParamList = action.getUnnamedParams();
+            this.unnamedParamIt = this.unnamedParamList.iterator();
+        }
+
+        public int getUnnamedParamCount() {
+            return unnamedParamList.size();
+        }
+
+        public int getRemainingUnnamedParamCount() {
+            return unnamedParamList.size() - unnamedParamItIndex;
         }
 
         public boolean hasNext() {
@@ -195,7 +226,9 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
 
         @SuppressWarnings("unchecked")
         public <T> T next() {
-            return (T) unnamedParamIt.next();
+            var elem = unnamedParamIt.next();
+            unnamedParamItIndex++;
+            return elem != null ? (T) elem : null;
         }
     }
 }
