@@ -14,6 +14,7 @@ import lombok.val;
 import tools.vitruv.dsls.reactions.runtime.helper.PersistenceHelper;
 import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
+import tools.vitruv.dsls.reactions.runtime.structure.ChangePropagationParameter;
 
 /**
  * Update extends {@link CorrespondenceRetriever} for managing correspondences,
@@ -161,13 +162,11 @@ public class Update extends CorrespondenceRetriever {
         return new RoutineDelegation().viaFacade(facade);
     }
 
-    protected RoutineDelegation getDelegationFromParam(AbstractRoutinesFacade facade, String paramName, Object...input) {
+    protected RoutineDelegation getDelegationFromParam(AbstractRoutinesFacade facade, ChangePropagationParameter param, Object...input) {
         var currentRoutine = getCurrentRoutine(facade);
-        @SuppressWarnings("unchecked")
-        // TODO: Define an actual class for this complex function
-        var delFunc = (Function<List<?>, RoutineDelegation>) currentRoutine.getParam(paramName);
+        var delFunc = (RoutineDelegationGenerator) currentRoutine.getParam(param);
         var inputList = input != null ? List.of(input) : List.of();
-        return delFunc.apply(inputList).viaFacade(facade);
+        return delFunc.generateRoutineDelegation(inputList).viaFacade(facade);
     }
 
     /**
@@ -178,8 +177,8 @@ public class Update extends CorrespondenceRetriever {
         return (RoutineBase) facade.getCurrentCaller();
     }
 
-    protected <T> T getParam(AbstractRoutinesFacade facade, String paramName) {
-        return this.getCurrentRoutine(facade).getParam(paramName);
+    protected <T> T getParam(AbstractRoutinesFacade facade, ChangePropagationParameter param) {
+        return this.getCurrentRoutine(facade).getParam(param);
     }
 
     // /**

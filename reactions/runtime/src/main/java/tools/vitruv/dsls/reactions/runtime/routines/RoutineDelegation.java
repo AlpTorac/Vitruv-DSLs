@@ -9,6 +9,7 @@ import java.util.Map;
 import tools.vitruv.dsls.reactions.runtime.reactions.AbstractReactionsChangePropagationSpecification;
 import tools.vitruv.dsls.reactions.runtime.state.ReactionExecutionState;
 import tools.vitruv.dsls.reactions.runtime.structure.CallHierarchyHaving;
+import tools.vitruv.dsls.reactions.runtime.structure.ChangePropagationParameter;
 
 public class RoutineDelegation {
     private AbstractReactionsChangePropagationSpecification cps;
@@ -18,7 +19,7 @@ public class RoutineDelegation {
 
     private String routineID;
     private final List<Object> unnamedParamList = new ArrayList<>();
-    private final Map<String, Object> namedParams = new LinkedHashMap<>();
+    private final Map<ChangePropagationParameter, Object> namedParams = new LinkedHashMap<>();
 
     private Routine routine;
 
@@ -125,8 +126,8 @@ public class RoutineDelegation {
         return this;
     }
 
-    public RoutineDelegation setNamedParam(String paramName, Object paramVal) {
-        this.namedParams.put(paramName, paramVal);
+    public RoutineDelegation setNamedParam(ChangePropagationParameter param, Object paramVal) {
+        this.namedParams.put(param, paramVal);
         return this;
     }
 
@@ -189,7 +190,7 @@ public class RoutineDelegation {
         return List.copyOf(unnamedParamList);
     }
 
-    public Map<String, Object> getNamedParams() {
+    public Map<ChangePropagationParameter, Object> getNamedParams() {
         return Map.copyOf(namedParams);
     }
 
@@ -222,6 +223,7 @@ public class RoutineDelegation {
                 castedRo.setCallHierarchyHaving(caller);
                 castedRo.setExecutionState(state);
             }
+            castedRo.clearNamedParams();
             castedRo.clearUnnamedParams();
             castedRo.putAllUnnamedParams(unnamedParamList);
             castedRo.putAllParams(namedParams);

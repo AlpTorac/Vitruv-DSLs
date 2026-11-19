@@ -13,7 +13,7 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         implements ChangePropagationAction, CallHistoryHaving {
     private String id;
 
-    private final Map<String, Object> paramNameToVal = new LinkedHashMap<>();
+    private final Map<ChangePropagationParameter, Object> paramToVal = new LinkedHashMap<>();
     private final List<Object> unnamedParams = new ArrayList<>();
 
     private final List<AbstractChangePropagationAction> calledActions = new ArrayList<>();
@@ -39,59 +39,99 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         return id;
     }
 
-    public Map<String, Object> getAllParams() {
-        return Map.copyOf(paramNameToVal);
+    public Map<ChangePropagationParameter, Object> getAllParams() {
+        return Map.copyOf(paramToVal);
     }
 
-    public Map<String, Object> putAllParams(AbstractChangePropagationAction caller) {
+    /**
+     * Should not throw an exception, since caller should contain valid parameter
+     * values
+     */
+    public Map<ChangePropagationParameter, Object> putAllParams(AbstractChangePropagationAction caller) {
         return putAllParams(caller.getAllParams());
     }
 
-    public Map<String, Object> putAllParams(Map<String, Object> params) {
-        var overriddenVals = new LinkedHashMap<String, Object>();
+    public Map<ChangePropagationParameter, Object> putAllParams(Map<ChangePropagationParameter, Object> params)
+            throws IllegalArgumentException {
+        var overriddenVals = new LinkedHashMap<ChangePropagationParameter, Object>();
         for (var e : params.entrySet()) {
-            var paramName = e.getKey();
+            var param = e.getKey();
             var paramVal = e.getValue();
-            if (hasParam(paramName)) {
-                overriddenVals.put(paramName, getParam(paramName));
+            if (hasParam(param)) {
+                overriddenVals.put(param, getParam(param));
             }
-            putParam(paramName, paramVal);
+            putParam(param, paramVal);
         }
         return overriddenVals;
     }
 
-    public Object putParam(String paramName, Object paramVal) {
-        return this.paramNameToVal.put(paramName, paramVal);
+    public Object putParam(ChangePropagationParameter param, Object paramVal) throws IllegalArgumentException {
+        // Check whether the parameter can be null
+        if (!param.isNullable() && paramVal == null) {
+            throw new IllegalArgumentException(param.getName() + " cannot be null");
+        }
+
+        // Check whether the given paramVal conforms to the foreseen type of param
+        if (!param.isNullable() && !param.getType().isAssignableFrom(paramVal.getClass())) {
+            throw new IllegalArgumentException(param.getName() + " cannot be assigned " + paramVal);
+        }
+        return this.paramToVal.put(param, paramVal);
+    }
+
+    public <T> T getParam(ChangePropagationParameter param) throws IllegalArgumentException {
+        if (hasParamDirectly(param)) {
+            return getParamDirectly(param);
+        }
+
+        return getParamViaCallers(param);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getParam(String paramName) {
-        if (hasParamDirectly(paramName)) {
-            var val = this.paramNameToVal.get(paramName);
-            return val != null ? (T) val : null;
+    public <T> T getParamDirectly(ChangePropagationParameter param) throws IllegalArgumentException {
+        if (!hasParamDirectly(param))
+            throw new IllegalArgumentException("No parameter " + param.getName() + " is directly set in this instance");
+
+        var val = this.paramToVal.get(param);
+        return val != null ? (T) val : null;
+    }
+
+    public <T> T getParamViaCallers(ChangePropagationParameter param) throws IllegalArgumentException {
+        if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
+            if (castedCaller.hasParamDirectly(param)) {
+                return castedCaller.getParamDirectly(param);
+            }
+            return castedCaller.getParamViaCallers(param);
         }
 
+        throw new IllegalArgumentException(
+                "No parameter " + param.getName() + " is set in any of the callers of this instance");
+    }
+
+    public boolean hasParam(ChangePropagationParameter param) {
+        return hasParamDirectly(param) || hasParamViaCallers(param);
+    }
+
+    public boolean hasParamDirectly(ChangePropagationParameter param) {
+        return this.paramToVal.containsKey(param);
+    }
+
+    public boolean hasParamViaCallers(ChangePropagationParameter param) {
         if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller)
-            return castedCaller.getParam(paramName);
-
-        throw new IllegalArgumentException("No parameter " + paramName + " is accessible");
-    }
-
-    // TODO: Consider implementing getParamDirectly, getParamViaCallers
-
-    public boolean hasParam(String paramName) {
-        return hasParamDirectly(paramName) || hasParamViaCallers(paramName);
-    }
-
-    public boolean hasParamDirectly(String paramName) {
-        return this.paramNameToVal.containsKey(paramName);
-    }
-
-    public boolean hasParamViaCallers(String paramName) {
-        if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller)
-            return castedCaller.hasParamDirectly(paramName) || castedCaller.hasParamViaCallers(paramName);
+            return castedCaller.hasParamDirectly(param) || castedCaller.hasParamViaCallers(param);
 
         return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T removeParam(ChangePropagationParameter param) {
+        var removedVal = this.paramToVal.remove(param);
+        return removedVal != null ? (T) removedVal : null;
+    }
+
+    public Map<ChangePropagationParameter, Object> clearNamedParams() {
+        var clearedParams = Map.copyOf(this.paramToVal);
+        this.paramToVal.clear();
+        return clearedParams;
     }
 
     public void putUnnamedParam(Object paramVal) {
