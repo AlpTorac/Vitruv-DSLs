@@ -57,8 +57,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         for (var e : params.entrySet()) {
             var param = e.getKey();
             var paramVal = e.getValue();
-            if (hasParam(param)) {
-                overriddenVals.put(param, getParam(param));
+            if (hasParamDirectly(param)) {
+                overriddenVals.put(param, getParamDirectly(param));
             }
             putParam(param, paramVal);
         }
