@@ -41,7 +41,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
     }
 
     public Map<ChangePropagationParameter, Object> getAllParams() {
-        // Deliberately use LinkedHashMap to allow null values
+        // Deliberately use LinkedHashMap to allow null values and to maintain the
+        // insertion order
         return new LinkedHashMap<>(paramToVal);
     }
 
@@ -55,7 +56,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
 
     public Map<ChangePropagationParameter, Object> putAllParams(Map<ChangePropagationParameter, Object> params)
             throws IllegalArgumentException {
-        // Deliberately use LinkedHashMap to allow null values
+        // Deliberately use LinkedHashMap to allow null values and to maintain the
+        // insertion order
         var overriddenVals = new LinkedHashMap<ChangePropagationParameter, Object>();
         for (var e : params.entrySet()) {
             var param = e.getKey();
@@ -82,16 +84,23 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
     }
 
     /**
-     * @return A map of (action, value of param in action)
+     * @return A map of (action, value of param in action), where the first entry is
+     *         the current action and the subsequent entries are the callers of the
+     *         current action.
      */
     public Map<AbstractChangePropagationAction, Object> getAllOccurrencesOf(ChangePropagationParameter param) {
-        // Deliberately use LinkedHashMap to allow null values
+        // Deliberately use LinkedHashMap to allow null values and to preserve the
+        // caller order
         var occurrences = new LinkedHashMap<AbstractChangePropagationAction, Object>();
         var currentAction = this;
-        while (currentAction.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
-            if (castedCaller.hasParam(param))
-                occurrences.put(castedCaller, castedCaller.getParam(param));
-            currentAction = castedCaller;
+        while (currentAction != null) {
+            if (currentAction.hasParam(param))
+                occurrences.put(currentAction, currentAction.getParam(param));
+            if (currentAction.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
+                currentAction = castedCaller;
+            } else {
+                currentAction = null;
+            }
         }
         return occurrences;
     }
@@ -101,19 +110,26 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
      */
     public Map<AbstractChangePropagationAction, Map<ChangePropagationParameter, Object>> getAllOccurrencesOf(
             String paramName) {
-        // Deliberately use LinkedHashMap to allow null values
+        // Deliberately use LinkedHashMap to allow null values and to maintain the
+        // insertion order
         var occurrences = new LinkedHashMap<AbstractChangePropagationAction, Map<ChangePropagationParameter, Object>>();
         var currentAction = this;
-        while (currentAction.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
-            var entries = castedCaller.paramToVal.entrySet().stream()
+        while (currentAction != null) {
+            var entries = currentAction.paramToVal.entrySet().stream()
                     .filter(e -> e.getKey().getName().equals(paramName)).toList();
             if (!entries.isEmpty()) {
-                // Deliberately use LinkedHashMap to allow null values
+                // Deliberately use LinkedHashMap to allow null values and to maintain the
+                // insertion order
                 var occurrencesInCaller = new LinkedHashMap<ChangePropagationParameter, Object>();
                 entries.forEach(e -> occurrencesInCaller.put(e.getKey(), e.getValue()));
-                occurrences.put(castedCaller, occurrencesInCaller);
+                occurrences.put(currentAction, occurrencesInCaller);
             }
-            currentAction = castedCaller;
+
+            if (currentAction.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
+                currentAction = castedCaller;
+            } else {
+                currentAction = null;
+            }
         }
         return occurrences;
     }
@@ -161,7 +177,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
     }
 
     public Map<ChangePropagationParameter, Object> clearNamedParams() {
-        // Deliberately use LinkedHashMap to allow null values
+        // Deliberately use LinkedHashMap to allow null values and to maintain the
+        // insertion order
         var clearedParams = new LinkedHashMap<>(this.paramToVal);
         this.paramToVal.clear();
         return clearedParams;
@@ -186,7 +203,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
     }
 
     public List<Object> getUnnamedParams() {
-        // Deliberately use ArrayList to allow null values
+        // Deliberately use ArrayList to allow null values and to maintain the insertion
+        // order
         return new ArrayList<>(unnamedParams);
     }
 
