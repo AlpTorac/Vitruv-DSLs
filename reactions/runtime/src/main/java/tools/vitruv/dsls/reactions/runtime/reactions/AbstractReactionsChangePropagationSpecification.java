@@ -29,7 +29,7 @@ import tools.vitruv.dsls.reactions.runtime.structure.CallHistoryHaving;
  * A {@link ChangePropagationSpecification} that executes {@link Reaction}s.
  */
 public abstract class AbstractReactionsChangePropagationSpecification
-    extends AbstractChangePropagationSpecification implements CallHistoryHaving<AbstractChangePropagationAction> {
+    extends AbstractChangePropagationSpecification implements CallHistoryHaving {
   private static Logger logger = LogManager.getLogger(
       AbstractReactionsChangePropagationSpecification.class);
 
