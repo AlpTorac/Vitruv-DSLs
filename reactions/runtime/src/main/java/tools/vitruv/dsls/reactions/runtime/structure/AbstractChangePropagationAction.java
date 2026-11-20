@@ -60,8 +60,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         for (var e : params.entrySet()) {
             var param = e.getKey();
             var paramVal = e.getValue();
-            if (hasParamDirectly(param)) {
-                overriddenVals.put(param, getParamDirectly(param));
+            if (hasParam(param)) {
+                overriddenVals.put(param, getParam(param));
             }
             putParam(param, paramVal);
         }
@@ -81,48 +81,77 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
         return this.paramToVal.put(param, paramVal);
     }
 
-    public <T> T getParam(ChangePropagationParameter param) throws IllegalArgumentException {
-        if (hasParamDirectly(param)) {
-            return getParamDirectly(param);
+    /**
+     * @return A map of (action, value of param in action)
+     */
+    public Map<AbstractChangePropagationAction, Object> getAllOccurrencesOf(ChangePropagationParameter param) {
+        // Deliberately use LinkedHashMap to allow null values
+        var occurrences = new LinkedHashMap<AbstractChangePropagationAction, Object>();
+        var currentAction = this;
+        while (currentAction.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
+            if (castedCaller.hasParam(param))
+                occurrences.put(castedCaller, castedCaller.getParam(param));
+            currentAction = castedCaller;
         }
+        return occurrences;
+    }
 
-        return getParamViaCallers(param);
+    /**
+     * @return A map of (action, (param in action, value of param in action))
+     */
+    public Map<AbstractChangePropagationAction, Map<ChangePropagationParameter, Object>> getAllOccurrencesOf(
+            String paramName) {
+        // Deliberately use LinkedHashMap to allow null values
+        var occurrences = new LinkedHashMap<AbstractChangePropagationAction, Map<ChangePropagationParameter, Object>>();
+        var currentAction = this;
+        while (currentAction.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
+            var entries = castedCaller.paramToVal.entrySet().stream()
+                    .filter(e -> e.getKey().getName().equals(paramName)).toList();
+            if (!entries.isEmpty()) {
+                // Deliberately use LinkedHashMap to allow null values
+                var occurrencesInCaller = new LinkedHashMap<ChangePropagationParameter, Object>();
+                entries.forEach(e -> occurrencesInCaller.put(e.getKey(), e.getValue()));
+                occurrences.put(castedCaller, occurrencesInCaller);
+            }
+            currentAction = castedCaller;
+        }
+        return occurrences;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getParamDirectly(ChangePropagationParameter param) throws IllegalArgumentException {
-        if (!hasParamDirectly(param))
+    public <T> T getParam(ChangePropagationParameter param) throws IllegalArgumentException {
+        if (!hasParam(param))
             throw new IllegalArgumentException("No parameter " + param.getName() + " is directly set in this instance");
 
         var val = this.paramToVal.get(param);
         return val != null ? (T) val : null;
     }
 
-    public <T> T getParamViaCallers(ChangePropagationParameter param) throws IllegalArgumentException {
-        if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller) {
-            if (castedCaller.hasParamDirectly(param)) {
-                return castedCaller.getParamDirectly(param);
-            }
-            return castedCaller.getParamViaCallers(param);
-        }
+    @SuppressWarnings("unchecked")
+    public <T> T getParam(String paramName) throws IllegalArgumentException {
+        if (!hasParam(paramName))
+            throw new IllegalArgumentException("No parameter " + paramName + " is directly set in this instance");
+        if (!isParamUnique(paramName))
+            throw new IllegalArgumentException("There are multiple occurrences of " + paramName
+                    + ", which makes its value ambiguous. Use getParam(Param) to retrieve the desired value, where Param is a ChangePropagationParameter");
 
-        throw new IllegalArgumentException(
-                "No parameter " + param.getName() + " is set in any of the callers of this instance");
+        var val = this.paramToVal.entrySet().stream()
+                .filter(e -> e.getKey().getName().equals(paramName)).findFirst().get().getValue();
+        return val != null ? (T) val : null;
+    }
+
+    public boolean isParamUnique(String paramName) {
+        // See if there are 2 or more matching parameter names.
+        // If not, the given paramName is unique here
+        return this.paramToVal.keySet().stream().filter(p -> p.getName().equals(paramName)).limit(2).count() < 2;
+    }
+
+    public boolean hasParam(String paramName) {
+        return this.paramToVal.keySet().stream().anyMatch(p -> p.getName().equals(paramName));
     }
 
     public boolean hasParam(ChangePropagationParameter param) {
-        return hasParamDirectly(param) || hasParamViaCallers(param);
-    }
-
-    public boolean hasParamDirectly(ChangePropagationParameter param) {
         return this.paramToVal.containsKey(param);
-    }
-
-    public boolean hasParamViaCallers(ChangePropagationParameter param) {
-        if (this.getCalledBy() instanceof AbstractChangePropagationAction castedCaller)
-            return castedCaller.hasParamDirectly(param) || castedCaller.hasParamViaCallers(param);
-
-        return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -132,7 +161,8 @@ public abstract class AbstractChangePropagationAction extends CallHierarchyHavin
     }
 
     public Map<ChangePropagationParameter, Object> clearNamedParams() {
-        var clearedParams = Map.copyOf(this.paramToVal);
+        // Deliberately use LinkedHashMap to allow null values
+        var clearedParams = new LinkedHashMap<>(this.paramToVal);
         this.paramToVal.clear();
         return clearedParams;
     }
