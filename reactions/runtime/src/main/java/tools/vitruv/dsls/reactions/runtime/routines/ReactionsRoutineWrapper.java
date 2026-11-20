@@ -31,7 +31,7 @@ public abstract class ReactionsRoutineWrapper extends RoutineBase {
     private AbstractReactionsChangePropagationSpecification callerCps;
     private ReactionsImportPath wrappedRoutineImportPath;
     private AbstractRoutinesFacade callerRoutinesFacade;
-    private OrderedActionParameterRetriever unnamedParamIt;
+    private UnnamedParamIt unnamedParamIt;
 
     /**
      * Builds a direct RoutinesFacadesProvider for the Routine to be wrapped:
